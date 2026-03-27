@@ -1,0 +1,62 @@
+{
+  "slug": "would-you-rather",
+  "name": { "en": "Would You Rather", "ar": "تفضّل إيه" },
+  "description": {
+    "en": "Choose between two impossible options. There is no right answer!",
+    "ar": "اختار بين اختيارين مستحيلين. مفيش إجابة صح!"
+  },
+  "howToPlay": {
+    "en": "Read the card and pick one of the two options. Everyone votes at the same time. Discuss and debate your choices — the fun is in the arguments!",
+    "ar": "اقرا الكارت واختار واحد من الاختيارين. الكل يصوّت في نفس الوقت. ناقشوا اختياراتكم — المتعة في النقاش!"
+  },
+  "icon": "⚖️",
+  "color": "from-blue-500 to-cyan-600",
+  "minPlayers": 2,
+  "maxPlayers": 20,
+  "cards": {
+    "en": [
+      "Would you rather be able to fly or be invisible?",
+      "Would you rather always be 10 minutes late or 20 minutes early?",
+      "Would you rather lose your phone or your wallet?",
+      "Would you rather have unlimited money or unlimited time?",
+      "Would you rather know how you die or when you die?",
+      "Would you rather live without music or without movies?",
+      "Would you rather be the funniest person in the room or the smartest?",
+      "Would you rather never age physically or never age mentally?",
+      "Would you rather travel to the past or to the future?",
+      "Would you rather always speak your mind or never speak again?",
+      "Would you rather have free Wi-Fi everywhere or free coffee everywhere?",
+      "Would you rather be stuck in an elevator with your ex or your boss?",
+      "Would you rather never use social media again or never watch a movie again?",
+      "Would you rather have a rewind button in life or a pause button?",
+      "Would you rather know every language or play every instrument?",
+      "Would you rather live in a treehouse or in a submarine?",
+      "Would you rather eat only sweet food or only salty food for a year?",
+      "Would you rather be famous but hated or unknown but loved?",
+      "Would you rather have no friends but lots of money or lots of friends but no money?",
+      "Would you rather be able to teleport or read minds?"
+    ],
+    "ar": [
+      "تفضّل تقدر تطير ولا تبقى محدش شايفك؟",
+      "تفضّل دايماً تتأخر ١٠ دقايق ولا دايماً تبكّر ٢٠ دقيقة؟",
+      "تفضّل تضيّع موبايلك ولا محفظتك؟",
+      "تفضّل فلوس من غير حدود ولا وقت من غير حدود؟",
+      "تفضّل تعرف تموت إزاي ولا تموت إمتى؟",
+      "تفضّل تعيش من غير موسيقى ولا من غير أفلام؟",
+      "تفضّل تبقى أظرف واحد في الأوضة ولا أذكى واحد؟",
+      "تفضّل ما تكبرش شكلياً ولا ما تكبرش عقلياً؟",
+      "تفضّل تسافر للماضي ولا المستقبل؟",
+      "تفضّل دايماً تقول اللي في بالك ولا ما تتكلمش تاني أبداً؟",
+      "تفضّل واي فاي ببلاش في كل حتة ولا قهوة ببلاش في كل حتة؟",
+      "تفضّل تتحبس في أسانسير مع إكسك ولا مع مديرك؟",
+      "تفضّل ما تستخدمش سوشيال ميديا تاني ولا ما تتفرجش على أفلام تاني؟",
+      "تفضّل يبقى عندك زرار رجوع في حياتك ولا زرار وقف مؤقت؟",
+      "تفضّل تعرف كل لغة ولا تعزف كل آلة؟",
+      "تفضّل تعيش في بيت شجرة ولا في غواصة؟",
+      "تفضّل تاكل بس حلويات ولا بس مالح لمدة سنة؟",
+      "تفضّل تبقى مشهور بس مكروه ولا مجهول بس محبوب؟",
+      "تفضّل ما يبقاش عندك صحاب بس فلوس كتير ولا صحاب كتير من غير فلوس؟",
+      "تفضّل تقدر تنقل نفسك لأي مكان ولا تقرا أفكار الناس؟"
+    ]
+  }
+}

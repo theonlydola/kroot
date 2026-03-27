@@ -1,0 +1,72 @@
+{
+  "slug": "truth-or-dare",
+  "name": { "en": "Truth or Dare", "ar": "صراحة ولا جرأة" },
+  "description": {
+    "en": "The classic party game! Choose truth or dare and face the consequences.",
+    "ar": "لعبة القعدات الكلاسيكية! اختار صراحة ولا جرأة وواجه العواقب."
+  },
+  "howToPlay": {
+    "en": "Take turns choosing 'Truth' or 'Dare'. If you choose Truth, answer the question honestly. If you choose Dare, complete the challenge. No backing out!",
+    "ar": "كل واحد بدوره يختار 'صراحة' ولا 'جرأة'. لو اخترت صراحة، جاوب على السؤال بصراحة. لو اخترت جرأة، نفّذ التحدي. مفيش رجوع!"
+  },
+  "icon": "🎯",
+  "color": "from-emerald-500 to-teal-600",
+  "minPlayers": 2,
+  "maxPlayers": 20,
+  "cards": {
+    "en": [
+      "Truth: What's the biggest lie you've ever told?",
+      "Dare: Do your best impression of another player",
+      "Truth: What's the most embarrassing thing you've done in public?",
+      "Dare: Let someone go through your last 10 photos",
+      "Truth: Who in this room do you trust the least?",
+      "Dare: Call a random contact and sing happy birthday",
+      "Truth: What's your most unpopular opinion?",
+      "Dare: Post a story right now without a filter",
+      "Truth: What's the pettiest reason you've stopped talking to someone?",
+      "Dare: Let the group send one message from your phone",
+      "Truth: Who was your first crush in this room?",
+      "Dare: Do 20 pushups right now",
+      "Truth: What's something you've done that you'd judge someone else for?",
+      "Dare: Talk in an accent for the next 3 rounds",
+      "Truth: What's the worst date you've ever been on?",
+      "Dare: Let someone post anything on your social media",
+      "Truth: What's a secret you've never told anyone here?",
+      "Dare: Eat a spoonful of the spiciest thing available",
+      "Truth: Who here do you think would be the worst roommate?",
+      "Dare: Don't use your phone for the next 30 minutes",
+      "Truth: What's the most childish thing you still do?",
+      "Dare: Speak in only questions for the next 3 rounds",
+      "Truth: If you had to date someone in this room, who?",
+      "Dare: Let each player give you a dare — pick the worst one",
+      "Truth: What's your guilty pleasure that you're ashamed of?"
+    ],
+    "ar": [
+      "صراحة: إيه أكبر كدبة قلتها في حياتك؟",
+      "جرأة: قلّد حد من اللاعبين بأحسن طريقة",
+      "صراحة: إيه أكتر حاجة محرجة عملتها في مكان عام؟",
+      "جرأة: خلّي حد يشوف آخر ١٠ صور في موبايلك",
+      "صراحة: مين في الأوضة أقل واحد واثق فيه؟",
+      "جرأة: كلّم حد عشوائي من الكونتاكت وغنّيله هابي بيرث داي",
+      "صراحة: إيه أكتر رأي عندك الناس مش بتوافق عليه؟",
+      "جرأة: نزّل ستوري دلوقتي من غير فلتر",
+      "صراحة: إيه أتفه سبب بطّلت تكلم حد عشانه؟",
+      "جرأة: خلّي الجروب يبعت رسالة من موبايلك",
+      "صراحة: مين كان أول كراش ليك في الأوضة؟",
+      "جرأة: اعمل ٢٠ ضغطة دلوقتي",
+      "صراحة: إيه حاجة عملتها وتحكم على غيرك لو عملها؟",
+      "جرأة: اتكلم بلهجة مختلفة لمدة ٣ جولات",
+      "صراحة: إيه أوحش ديت طلعت فيه؟",
+      "جرأة: خلّي حد ينزّل أي حاجة على أكاونتك",
+      "صراحة: إيه سر ما قلتوش لحد هنا؟",
+      "جرأة: كل معلقة من أحر حاجة موجودة",
+      "صراحة: مين هنا تتوقع يكون أوحش شريك سكن؟",
+      "جرأة: ما تستخدمش موبايلك لمدة ٣٠ دقيقة",
+      "صراحة: إيه أكتر حاجة طفولية لسه بتعملها؟",
+      "جرأة: اتكلم بس بأسئلة لمدة ٣ جولات",
+      "صراحة: لو لازم تواعد حد في الأوضة، مين؟",
+      "جرأة: خلّي كل لاعب يديك تحدي — اختار الأوحش",
+      "صراحة: إيه حاجة بتستمتع بيها في السر وبتستحي منها؟"
+    ]
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "slug": "imposter",
+  "name": { "en": "Imposter", "ar": "بكاسة" },
+  "description": {
+    "en": "Everyone gets the same word — except the imposter! Ask questions and find out who doesn't belong.",
+    "ar": "الكل بياخد نفس الكلمة — إلا المندس! اسألوا أسئلة واعرفوا مين الغريب."
+  },
+  "howToPlay": {
+    "en": "Everyone receives a word on their phone. One player gets a different word (the Imposter!). Take turns describing your word without saying it directly. After everyone has spoken, vote on who you think is the imposter. The imposter wins if they guess the group's word!",
+    "ar": "كل واحد يشوف كلمة على موبايله. لاعب واحد بياخد كلمة مختلفة (المندس!). كل واحد بدوره يوصف كلمته من غير ما يقولها. بعد ما الكل يتكلم، صوّتوا على مين المندس. المندس يكسب لو عرف كلمة الجروب!"
+  },
+  "icon": "🕵️",
+  "color": "from-amber-500 to-orange-600",
+  "minPlayers": 4,
+  "maxPlayers": 10,
+  "categories": {
+    "en": {
+      "food": [
+        { "word": "Pizza", "imposter": "Burger" },
+        { "word": "Sushi", "imposter": "Ramen" },
+        { "word": "Coffee", "imposter": "Tea" },
+        { "word": "Ice Cream", "imposter": "Frozen Yogurt" },
+        { "word": "Pasta", "imposter": "Noodles" },
+        { "word": "Cake", "imposter": "Pie" },
+        { "word": "Falafel", "imposter": "Nuggets" },
+        { "word": "Popcorn", "imposter": "Chips" },
+        { "word": "Chocolate", "imposter": "Caramel" },
+        { "word": "Pancakes", "imposter": "Waffles" },
+        { "word": "Tacos", "imposter": "Burritos" },
+        { "word": "Shawarma", "imposter": "Kebab" },
+        { "word": "Croissant", "imposter": "Donut" },
+        { "word": "Steak", "imposter": "Grilled Chicken" },
+        { "word": "Mango", "imposter": "Peach" }
+      ],
+      "animals": [
+        { "word": "Dog", "imposter": "Cat" },
+        { "word": "Shark", "imposter": "Dolphin" },
+        { "word": "Eagle", "imposter": "Hawk" },
+        { "word": "Lion", "imposter": "Tiger" },
+        { "word": "Rabbit", "imposter": "Hamster" },
+        { "word": "Horse", "imposter": "Donkey" },
+        { "word": "Penguin", "imposter": "Puffin" },
+        { "word": "Crocodile", "imposter": "Lizard" },
+        { "word": "Whale", "imposter": "Shark" },
+        { "word": "Monkey", "imposter": "Gorilla" },
+        { "word": "Parrot", "imposter": "Canary" },
+        { "word": "Bear", "imposter": "Panda" },
+        { "word": "Snake", "imposter": "Worm" },
+        { "word": "Camel", "imposter": "Horse" },
+        { "word": "Butterfly", "imposter": "Moth" }
+      ],
+      "objects": [
+        { "word": "Guitar", "imposter": "Drums" },
+        { "word": "Airplane", "imposter": "Helicopter" },
+        { "word": "Taxi", "imposter": "Bus" },
+        { "word": "Library", "imposter": "Bookstore" },
+        { "word": "Hospital", "imposter": "Pharmacy" },
+        { "word": "University", "imposter": "High School" },
+        { "word": "Painting", "imposter": "Photography" },
+        { "word": "Laptop", "imposter": "Tablet" },
+        { "word": "Watch", "imposter": "Clock" },
+        { "word": "Bicycle", "imposter": "Scooter" },
+        { "word": "Candle", "imposter": "Lamp" },
+        { "word": "Mirror", "imposter": "Window" },
+        { "word": "Umbrella", "imposter": "Raincoat" },
+        { "word": "Backpack", "imposter": "Suitcase" },
+        { "word": "Telescope", "imposter": "Binoculars" }
+      ]
+    },
+    "ar": {
+      "food": [
+        { "word": "بيتزا", "imposter": "برجر" },
+        { "word": "سوشي", "imposter": "رامن" },
+        { "word": "قهوة", "imposter": "شاي" },
+        { "word": "آيس كريم", "imposter": "فروزن يوغرت" },
+        { "word": "مكرونة", "imposter": "نودلز" },
+        { "word": "كيك", "imposter": "فطيرة" },
+        { "word": "فلافل", "imposter": "ناجتس" },
+        { "word": "فشار", "imposter": "شيبسي" },
+        { "word": "شوكولاتة", "imposter": "كراميل" },
+        { "word": "بان كيك", "imposter": "وافل" },
+        { "word": "تاكوز", "imposter": "بوريتو" },
+        { "word": "شاورما", "imposter": "كباب" },
+        { "word": "كرواسون", "imposter": "دونات" },
+        { "word": "ستيك", "imposter": "فراخ مشوية" },
+        { "word": "مانجا", "imposter": "خوخ" }
+      ],
+      "animals": [
+        { "word": "كلب", "imposter": "قطة" },
+        { "word": "قرش", "imposter": "دلفين" },
+        { "word": "نسر", "imposter": "صقر" },
+        { "word": "أسد", "imposter": "نمر" },
+        { "word": "أرنب", "imposter": "هامستر" },
+        { "word": "حصان", "imposter": "حمار" },
+        { "word": "بطريق", "imposter": "بافن" },
+        { "word": "تمساح", "imposter": "سحلية" },
+        { "word": "حوت", "imposter": "قرش" },
+        { "word": "قرد", "imposter": "غوريلا" },
+        { "word": "ببغاء", "imposter": "كناري" },
+        { "word": "دب", "imposter": "باندا" },
+        { "word": "تعبان", "imposter": "دودة" },
+        { "word": "جمل", "imposter": "حصان" },
+        { "word": "فراشة", "imposter": "عتة" }
+      ],
+      "objects": [
+        { "word": "جيتار", "imposter": "طبول" },
+        { "word": "طيارة", "imposter": "هليكوبتر" },
+        { "word": "تاكسي", "imposter": "أوتوبيس" },
+        { "word": "مكتبة", "imposter": "معرض كتب" },
+        { "word": "مستشفى", "imposter": "صيدلية" },
+        { "word": "جامعة", "imposter": "ثانوي" },
+        { "word": "رسم", "imposter": "تصوير" },
+        { "word": "لابتوب", "imposter": "تابلت" },
+        { "word": "ساعة يد", "imposter": "ساعة حيط" },
+        { "word": "عجلة", "imposter": "سكوتر" },
+        { "word": "شمعة", "imposter": "لمبة" },
+        { "word": "مراية", "imposter": "شباك" },
+        { "word": "شمسية", "imposter": "معطف مطر" },
+        { "word": "شنطة ضهر", "imposter": "شنطة سفر" },
+        { "word": "تلسكوب", "imposter": "منظار" }
+      ]
+    }
+  }
+}
