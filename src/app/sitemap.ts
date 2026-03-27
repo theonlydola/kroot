@@ -3,7 +3,7 @@ import { locales } from "@/lib/i18n";
 import { games } from "@/data/games";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://kroot.app";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://kroot.online";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];

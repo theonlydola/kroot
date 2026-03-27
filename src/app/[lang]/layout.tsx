@@ -47,7 +47,7 @@ export async function generateMetadata({
     },
     description: dict.meta.siteDescription,
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL || "https://kroot.app"
+      process.env.NEXT_PUBLIC_SITE_URL || "https://kroot.online"
     ),
     alternates: {
       canonical: `/${lang}`,
