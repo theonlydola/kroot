@@ -21,25 +21,9 @@ export function trackPageView(page: string, lang: string) {
 }
 
 export function trackGameStart(slug: string, lang: string) {
-  if (!token) return;
-  initMixpanel();
   mixpanel.track("Game Start", { game: slug, lang });
 }
 
-export function trackCardView(slug: string, cardIndex: number) {
-  if (!token) return;
-  initMixpanel();
-  mixpanel.track("Card View", { game: slug, cardIndex });
-}
-
-export function trackThemeChange(theme: string) {
-  if (!token) return;
-  initMixpanel();
-  mixpanel.track("Theme Change", { theme });
-}
-
-export function trackLanguageSwitch(from: string, to: string) {
-  if (!token) return;
-  initMixpanel();
-  mixpanel.track("Language Switch", { from, to });
+export function trackGamePlayersNumber(slug: string, players: number) {
+  mixpanel.track("Game Players Number", { game: slug, players });
 }

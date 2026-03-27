@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trackGameStart, trackGamePlayersNumber } from "@/lib/mixpanel";
 
 // ─── Types ───────────────────────────────────────────────────────
 type CategoryKey = "food" | "animals" | "objects";
@@ -65,6 +66,8 @@ type ImposterDict = {
 type ImposterGameProps = {
   categories: Record<CategoryKey, WordPair[]>;
   dict: ImposterDict;
+  slug: string;
+  lang: string;
 };
 
 // ─── Constants ───────────────────────────────────────────────────
@@ -137,7 +140,7 @@ function clearGame() {
 }
 
 // ─── Component ───────────────────────────────────────────────────
-export function ImposterGame({ categories, dict }: ImposterGameProps) {
+export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps) {
   const [savedGame, setSavedGame] = useState<GameState | null>(() => {
     if (typeof window === "undefined") return null;
     const saved = loadGame();
@@ -281,7 +284,9 @@ export function ImposterGame({ categories, dict }: ImposterGameProps) {
     setVoterRevealed(false);
     setImposterGuessResult(null);
     setPhase("dealing");
-  }, [categories, category, numPlayers]);
+    trackGameStart(slug, lang);
+    trackGamePlayersNumber(slug, numPlayers);
+  }, [categories, category, numPlayers, slug, lang]);
 
   const startNewRound = useCallback(() => {
     const pool = categories[category];

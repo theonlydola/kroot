@@ -122,17 +122,23 @@ export default async function GamePage({
         <ImposterGame
           categories={getImposterGame().categories[locale]}
           dict={dict.imposter}
+          slug={slug}
+          lang={locale}
         />
       ) : game.slug === "bad-people" ? (
         <BadPeopleGame
           cards={game.cards![locale]}
           dict={dict.badPeople}
+          slug={slug}
+          lang={locale}
         />
       ) : game.slug === "truth-or-dare" ? (
         <TruthOrDareGame
           truths={getTruthOrDareGame().truths[locale]}
           dares={getTruthOrDareGame().dares[locale]}
           dict={dict.truthOrDare}
+          slug={slug}
+          lang={locale}
         />
       ) : (
         <GamePlay cards={game.cards![locale]} dict={dict.game} isRtl={isRtl} />

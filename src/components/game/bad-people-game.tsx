@@ -12,6 +12,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trackGameStart, trackGamePlayersNumber } from "@/lib/mixpanel";
 
 // ─── Types ───────────────────────────────────────────────────────
 type BadPeopleDict = {
@@ -51,6 +52,8 @@ type BadPeopleDict = {
 type BadPeopleGameProps = {
   cards: string[];
   dict: BadPeopleDict;
+  slug: string;
+  lang: string;
 };
 
 // ─── Constants ───────────────────────────────────────────────────
@@ -118,7 +121,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 // ─── Component ───────────────────────────────────────────────────
-export function BadPeopleGame({ cards, dict }: BadPeopleGameProps) {
+export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
   const [savedGame] = useState<GameState | null>(() => {
     if (typeof window === "undefined") return null;
     const saved = loadGame();
@@ -208,6 +211,8 @@ export function BadPeopleGame({ cards, dict }: BadPeopleGameProps) {
     setCurrentVoter(firstVoter);
 
     setPhase("master-vote");
+    trackGameStart(slug, lang);
+    trackGamePlayersNumber(slug, numPlayers);
     persistState({
       phase: "master-vote",
       numPlayers,
@@ -221,7 +226,7 @@ export function BadPeopleGame({ cards, dict }: BadPeopleGameProps) {
       currentVoter: 1,
       usedQuestions: indices,
     });
-  }, [cards.length, numPlayers, playerNames, persistState]);
+  }, [cards.length, numPlayers, playerNames, persistState, slug, lang]);
 
   // Master submits vote
   const submitMasterVote = useCallback(

@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, RotateCcw, ChevronRight, Trophy, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trackGameStart, trackGamePlayersNumber } from "@/lib/mixpanel";
 
 // ─── Types ───────────────────────────────────────────────────────
 type TruthOrDareDict = {
@@ -38,6 +39,8 @@ type TruthOrDareGameProps = {
   truths: string[];
   dares: string[];
   dict: TruthOrDareDict;
+  slug: string;
+  lang: string;
 };
 
 // ─── Constants ───────────────────────────────────────────────────
@@ -105,7 +108,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 // ─── Component ───────────────────────────────────────────────────
-export function TruthOrDareGame({ truths, dares, dict }: TruthOrDareGameProps) {
+export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDareGameProps) {
   const [savedGame] = useState<GameState | null>(() => {
     if (typeof window === "undefined") return null;
     const saved = loadGame();
@@ -188,6 +191,8 @@ export function TruthOrDareGame({ truths, dares, dict }: TruthOrDareGameProps) {
     setFirstChoice(null);
     setRoundPoints(null);
     setPhase("pick");
+    trackGameStart(slug, lang);
+    trackGamePlayersNumber(slug, numPlayers);
 
     persistState({
       phase: "pick",
@@ -201,11 +206,12 @@ export function TruthOrDareGame({ truths, dares, dict }: TruthOrDareGameProps) {
       firstChoice: null,
       roundPoints: null,
     });
-  }, [truths.length, dares.length, numPlayers, playerNames, persistState]);
+  }, [truths.length, dares.length, numPlayers, playerNames, persistState, slug, lang]);
 
-  // Current round's truth and dare texts
-  const truthIdx = shuffledTruths[(round - 1) % shuffledTruths.length];
-  const dareIdx = shuffledDares[(round - 1) % shuffledDares.length];
+  // Current turn's truth and dare texts (unique per player per round)
+  const turnIndex = (round - 1) * numPlayers + currentPlayerIndex;
+  const truthIdx = shuffledTruths[turnIndex % shuffledTruths.length];
+  const dareIdx = shuffledDares[turnIndex % shuffledDares.length];
   const currentTruth = truths[truthIdx] ?? "";
   const currentDare = dares[dareIdx] ?? "";
 
@@ -252,16 +258,18 @@ export function TruthOrDareGame({ truths, dares, dict }: TruthOrDareGameProps) {
     persistState({ phase: "round-result", roundPoints: 0 });
   }, [persistState]);
 
-  // Next round
+  // Next turn (round increments only after all players have played)
   const nextRound = useCallback(() => {
-    const newRound = round + 1;
-    if (newRound > TOTAL_ROUNDS) {
+    const nextPlayer = (currentPlayerIndex + 1) % numPlayers;
+    const isNewRound = nextPlayer === 0;
+    const newRound = isNewRound ? round + 1 : round;
+
+    if (isNewRound && newRound > TOTAL_ROUNDS) {
       setPhase("game-over");
       persistState({ phase: "game-over" });
       return;
     }
 
-    const nextPlayer = (currentPlayerIndex + 1) % numPlayers;
     setRound(newRound);
     setCurrentPlayerIndex(nextPlayer);
     setFirstChoice(null);
@@ -682,12 +690,7 @@ export function TruthOrDareGame({ truths, dares, dict }: TruthOrDareGameProps) {
 
         {/* Actions */}
         <div className="flex gap-3">
-          {round < TOTAL_ROUNDS ? (
-            <Button className="flex-1" size="lg" onClick={nextRound}>
-              <ChevronRight className="size-4" />
-              {dict.nextRound}
-            </Button>
-          ) : (
+          {round >= TOTAL_ROUNDS && (currentPlayerIndex + 1) % numPlayers === 0 ? (
             <Button
               className="flex-1"
               size="lg"
@@ -697,6 +700,11 @@ export function TruthOrDareGame({ truths, dares, dict }: TruthOrDareGameProps) {
               }}
             >
               {dict.scoreboard}
+            </Button>
+          ) : (
+            <Button className="flex-1" size="lg" onClick={nextRound}>
+              <ChevronRight className="size-4" />
+              {dict.nextRound}
             </Button>
           )}
           <Button variant="outline" size="lg" onClick={newGame}>
