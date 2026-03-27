@@ -40,20 +40,44 @@ export async function generateMetadata({
   const dict = await getDictionary(lang as Locale);
   const otherLang = lang === "en" ? "ar" : "en";
 
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://kroot.online";
+
   return {
     title: {
       default: dict.meta.homeTitle,
       template: `%s | ${dict.meta.siteName}`,
     },
     description: dict.meta.siteDescription,
-    metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL || "https://kroot.online"
-    ),
+    keywords: [
+      "ألعاب ورق",
+      "ألعاب جماعية",
+      "ألعاب حفلات",
+      "كروت",
+      "ألعاب مجانية",
+      "المندس",
+      "قصص مظلمة",
+      "صراحة ولا جرأة",
+      "النهاية السوداء",
+      "قول اميم",
+      "card games",
+      "party games",
+      "group games",
+      "kroot",
+      "free games",
+      "imposter",
+      "dark stories",
+      "truth or dare",
+      "would you rather",
+      "2ool ameme",
+      "arcade store",
+    ],
+    metadataBase: new URL(BASE_URL),
     alternates: {
       canonical: `/${lang}`,
       languages: {
         [lang]: `/${lang}`,
         [otherLang]: `/${otherLang}`,
+        "x-default": "/en",
       },
     },
     icons: {
@@ -64,8 +88,17 @@ export async function generateMetadata({
       description: dict.meta.siteDescription,
       siteName: dict.meta.siteName,
       locale: lang === "ar" ? "ar_EG" : "en_US",
+      alternateLocale: lang === "ar" ? "en_US" : "ar_EG",
       type: "website",
+      url: `${BASE_URL}/${lang}`,
     },
+    twitter: {
+      card: "summary",
+      title: dict.meta.homeTitle,
+      description: dict.meta.siteDescription,
+    },
+    applicationName: dict.meta.siteName,
+    category: "games",
   };
 }
 
@@ -82,6 +115,15 @@ export default async function RootLayout({
   const locale = lang as Locale;
   const dir = getDirection(locale);
   const isArabic = locale === "ar";
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://kroot.online";
+
+  const organizationLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Kroot",
+    url: BASE_URL,
+    logo: `${BASE_URL}/kroot.svg`,
+  };
 
   return (
     <html
@@ -93,6 +135,10 @@ export default async function RootLayout({
       <body
         className={`min-h-full flex flex-col bg-background text-foreground ${isArabic ? "font-[family-name:var(--font-cairo)]" : "font-[family-name:var(--font-geist-sans)]"}`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+        />
         <ThemeProvider>
           <AnalyticsProvider lang={locale} />
           <Header lang={locale} />

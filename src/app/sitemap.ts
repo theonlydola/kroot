@@ -16,9 +16,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
       alternates: {
-        languages: Object.fromEntries(
-          locales.map((l) => [l, `${BASE_URL}/${l}`])
-        ),
+        languages: {
+          ...Object.fromEntries(
+            locales.map((l) => [l, `${BASE_URL}/${l}`])
+          ),
+          "x-default": `${BASE_URL}/en`,
+        },
       },
     });
   }
@@ -32,9 +35,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "monthly",
         priority: 0.8,
         alternates: {
-          languages: Object.fromEntries(
-            locales.map((l) => [l, `${BASE_URL}/${l}/games/${game.slug}`])
-          ),
+          languages: {
+            ...Object.fromEntries(
+              locales.map((l) => [l, `${BASE_URL}/${l}/games/${game.slug}`])
+            ),
+            "x-default": `${BASE_URL}/en/games/${game.slug}`,
+          },
         },
       });
     }

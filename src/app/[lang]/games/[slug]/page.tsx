@@ -28,15 +28,21 @@ export async function generateMetadata({
   if (!game) return {};
   const dict = await getDictionary(locale);
   const otherLang = locale === "en" ? "ar" : "en";
+  const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://kroot.online";
 
   return {
     title: game.name[locale],
     description: game.description[locale],
+    keywords:
+      locale === "ar"
+        ? [game.name.ar, "ألعاب ورق", "ألعاب جماعية", "كروت", "ألعاب حفلات"]
+        : [game.name.en, "card games", "party games", "kroot", "group games"],
     alternates: {
       canonical: `/${locale}/games/${slug}`,
       languages: {
         [locale]: `/${locale}/games/${slug}`,
         [otherLang]: `/${otherLang}/games/${slug}`,
+        "x-default": `/en/games/${slug}`,
       },
     },
     openGraph: {
@@ -44,7 +50,14 @@ export async function generateMetadata({
       description: game.description[locale],
       siteName: dict.meta.siteName,
       locale: locale === "ar" ? "ar_EG" : "en_US",
+      alternateLocale: locale === "ar" ? "en_US" : "ar_EG",
       type: "website",
+      url: `${BASE_URL}/${locale}/games/${slug}`,
+    },
+    twitter: {
+      card: "summary",
+      title: `${game.name[locale]} | ${dict.meta.siteName}`,
+      description: game.description[locale],
     },
   };
 }

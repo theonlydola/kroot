@@ -4,6 +4,8 @@ import { hasLocale, getDictionary } from "./dictionaries";
 import { games } from "@/data/games";
 import { GameCard } from "@/components/game/game-card";
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://kroot.online";
+
 export default async function HomePage({
   params,
 }: {
@@ -17,6 +19,37 @@ export default async function HomePage({
 
   return (
     <>
+      {/* JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: dict.meta.siteName,
+            url: `${BASE_URL}/${locale}`,
+            description: dict.meta.siteDescription,
+            inLanguage: locale === "ar" ? "ar-SA" : "en-US",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: dict.home.featuredGames,
+            itemListElement: games.map((game, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: `${BASE_URL}/${locale}/games/${game.slug}`,
+              name: game.name[locale],
+            })),
+          }),
+        }}
+      />
+
       {/* Hero */}
       <section className="bg-gradient-to-b from-primary/5 to-background px-4 py-16 text-center sm:py-24">
         <div className="mx-auto max-w-2xl">
