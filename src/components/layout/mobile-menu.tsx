@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
 type Dict = {
-  nav: { home: string; switchLanguage: string; menu: string };
+  nav: { home: string; contact: string; switchLanguage: string; menu: string };
 };
 
 export function MobileMenu({ lang, dict }: { lang: string; dict: Dict }) {
@@ -33,6 +33,13 @@ export function MobileMenu({ lang, dict }: { lang: string; dict: Dict }) {
               className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               {dict.nav.home}
+            </Link>
+            <Link
+              href={`/${lang}/contact`}
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              {dict.nav.contact}
             </Link>
             <LanguageSwitcher lang={lang} label={dict.nav.switchLanguage} />
           </nav>

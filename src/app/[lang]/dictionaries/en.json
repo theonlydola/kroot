@@ -8,6 +8,7 @@
   "nav": {
     "home": "Home",
     "games": "Games",
+    "contact": "Contact",
     "darkMode": "Dark mode",
     "lightMode": "Light mode",
     "switchLanguage": "العربية",
@@ -142,5 +143,24 @@
     "title": "Page Not Found",
     "description": "The page you're looking for doesn't exist.",
     "backHome": "Back to Home"
+  },
+  "contact": {
+    "metaTitle": "Contact Us",
+    "metaDescription": "Get in touch with the Kroot team. We'd love to hear your feedback, suggestions, or questions!",
+    "title": "Contact Us",
+    "description": "Have a question, suggestion, or just want to say hi? Drop us a message!",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "messageLabel": "Message",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "your@email.com",
+    "messagePlaceholder": "What's on your mind?",
+    "submitButton": "Send Message",
+    "sending": "Sending...",
+    "successMessage": "Message sent! We'll get back to you soon.",
+    "errorMessage": "Something went wrong. Please try again.",
+    "nameRequired": "Name is required.",
+    "emailRequired": "A valid email is required.",
+    "messageRequired": "Message is required."
   }
 }

@@ -34,6 +34,12 @@ export async function Header({ lang }: { lang: Locale }) {
           >
             {dict.nav.home}
           </Link>
+          <Link
+            href={`/${lang}/contact`}
+            className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            {dict.nav.contact}
+          </Link>
           <LanguageSwitcher lang={lang} label={dict.nav.switchLanguage} />
           <ThemeToggle label={dict.nav.darkMode} />
         </nav>

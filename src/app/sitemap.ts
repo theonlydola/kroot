@@ -46,5 +46,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
+  // Contact pages for each locale
+  for (const lang of locales) {
+    entries.push({
+      url: `${BASE_URL}/${lang}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+      alternates: {
+        languages: {
+          ...Object.fromEntries(
+            locales.map((l) => [l, `${BASE_URL}/${l}/contact`])
+          ),
+          "x-default": `${BASE_URL}/en/contact`,
+        },
+      },
+    });
+  }
+
   return entries;
 }

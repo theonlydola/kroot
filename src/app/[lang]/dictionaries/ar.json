@@ -8,6 +8,7 @@
   "nav": {
     "home": "الرئيسية",
     "games": "الألعاب",
+    "contact": "تواصل معنا",
     "darkMode": "الوضع الغامق",
     "lightMode": "الوضع الفاتح",
     "switchLanguage": "English",
@@ -142,5 +143,24 @@
     "title": "الصفحة مش موجودة",
     "description": "الصفحة اللي بتدور عليها مش موجودة.",
     "backHome": "ارجع للرئيسية"
+  },
+  "contact": {
+    "metaTitle": "تواصل معنا",
+    "metaDescription": "تواصل مع فريق كروت. نحب نسمع رأيك، اقتراحاتك، أو أي سؤال عندك!",
+    "title": "تواصل معنا",
+    "description": "عندك سؤال، اقتراح، أو عايز تقول أهلاً؟ ابعتلنا رسالة!",
+    "nameLabel": "الاسم",
+    "emailLabel": "الإيميل",
+    "messageLabel": "الرسالة",
+    "namePlaceholder": "اسمك",
+    "emailPlaceholder": "example@email.com",
+    "messagePlaceholder": "إيه اللي في بالك؟",
+    "submitButton": "ابعت الرسالة",
+    "sending": "بيتبعت...",
+    "successMessage": "الرسالة اتبعتت! هنرد عليك في أقرب وقت.",
+    "errorMessage": "حصلت مشكلة. جرب تاني.",
+    "nameRequired": "الاسم مطلوب.",
+    "emailRequired": "إيميل صحيح مطلوب.",
+    "messageRequired": "الرسالة مطلوبة."
   }
 }
