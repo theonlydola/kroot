@@ -70,7 +70,7 @@ type ImposterDict = {
   wrong: string;
 };
 
-type ImposterGameProps = {
+export type ImposterGameProps = {
   categories: Record<CategoryKey, WordPair[]>;
   dict: ImposterDict;
   slug: string;
@@ -348,7 +348,7 @@ export function ImposterGame({
 
           <PlayerSetup
             numPlayers={numPlayers}
-            minPlayers={4}
+            minPlayers={3}
             maxPlayers={10}
             playerNames={playerNames}
             onNumPlayersChange={setNumPlayers}
