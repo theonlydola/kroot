@@ -11,8 +11,9 @@
   },
   "icon": "🕵️",
   "color": "from-amber-500 to-orange-600",
-  "minPlayers": 4,
+  "minPlayers": 3,
   "maxPlayers": 10,
+  "supportsOnline": true,
   "categories": {
     "en": {
       "food": [

@@ -16,6 +16,7 @@ export type Game = {
   color: string;
   minPlayers: number;
   maxPlayers: number;
+  supportsOnline?: boolean;
   cards?: { en: string[]; ar: string[] };
   truths?: { en: string[]; ar: string[] };
   dares?: { en: string[]; ar: string[] };
