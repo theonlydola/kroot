@@ -107,6 +107,33 @@
     "dismiss": "Start New",
     "questionsLeft": "questions left"
   },
+  "truthOrDare": {
+    "setupTitle": "Game Setup",
+    "numberOfPlayers": "Number of Players",
+    "enterNames": "Enter Player Names",
+    "startGame": "Start Game",
+    "player": "Player",
+    "round": "Round",
+    "truth": "Truth",
+    "dare": "Dare",
+    "pickACard": "Pick a card to reveal!",
+    "done": "Done",
+    "switchCard": "Switch",
+    "skip": "Skip",
+    "points": "pts",
+    "scoreboard": "Scoreboard",
+    "nextRound": "Next Round",
+    "newGame": "New Game",
+    "gameOver": "Game Over!",
+    "winner": "Winner",
+    "tied": "It's a tie!",
+    "playAgain": "Play Again",
+    "continueGame": "Continue Game?",
+    "continueGameDesc": "You have an unfinished game. Would you like to continue?",
+    "continueBtn": "Continue",
+    "dismiss": "Start New",
+    "yourTurn": "Your turn! Pick a card."
+  },
   "footer": {
     "tagline": "Free card games for your next gathering.",
     "rights": "All rights reserved."

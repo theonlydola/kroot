@@ -4,10 +4,11 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Users } from "lucide-react";
 import { locales, type Locale, getDirection } from "@/lib/i18n";
 import { hasLocale, getDictionary } from "@/app/[lang]/dictionaries";
-import { games, getGameBySlug, getImposterGame } from "@/data/games";
+import { games, getGameBySlug, getImposterGame, getTruthOrDareGame } from "@/data/games";
 import { GamePlay } from "@/components/game/game-play";
 import { ImposterGame } from "@/components/game/imposter-game";
 import { BadPeopleGame } from "@/components/game/bad-people-game";
+import { TruthOrDareGame } from "@/components/game/truth-or-dare-game";
 
 export async function generateStaticParams() {
   return locales.flatMap((lang) =>
@@ -113,6 +114,12 @@ export default async function GamePage({
         <BadPeopleGame
           cards={game.cards![locale]}
           dict={dict.badPeople}
+        />
+      ) : game.slug === "truth-or-dare" ? (
+        <TruthOrDareGame
+          truths={getTruthOrDareGame().truths[locale]}
+          dares={getTruthOrDareGame().dares[locale]}
+          dict={dict.truthOrDare}
         />
       ) : (
         <GamePlay cards={game.cards![locale]} dict={dict.game} isRtl={isRtl} />

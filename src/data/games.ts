@@ -17,6 +17,8 @@ export type Game = {
   minPlayers: number;
   maxPlayers: number;
   cards?: { en: string[]; ar: string[] };
+  truths?: { en: string[]; ar: string[] };
+  dares?: { en: string[]; ar: string[] };
   categories?: {
     en: Record<CategoryKey, WordPair[]>;
     ar: Record<CategoryKey, WordPair[]>;
@@ -44,4 +46,13 @@ export function getGameBySlug(slug: string): Game | undefined {
 
 export function getImposterGame(): ImposterGame {
   return imposter as unknown as ImposterGame;
+}
+
+export type TruthOrDareData = Game & {
+  truths: { en: string[]; ar: string[] };
+  dares: { en: string[]; ar: string[] };
+};
+
+export function getTruthOrDareGame(): TruthOrDareData {
+  return truthOrDare as unknown as TruthOrDareData;
 }

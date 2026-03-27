@@ -107,6 +107,33 @@
     "dismiss": "ابدأ جديد",
     "questionsLeft": "أسئلة باقية"
   },
+  "truthOrDare": {
+    "setupTitle": "إعداد اللعبة",
+    "numberOfPlayers": "عدد اللاعبين",
+    "enterNames": "اكتب أسامي اللاعبين",
+    "startGame": "ابدأ اللعبة",
+    "player": "لاعب",
+    "round": "الجولة",
+    "truth": "صراحة",
+    "dare": "جرأة",
+    "pickACard": "اختار كارت واكشفه!",
+    "done": "تمام",
+    "switchCard": "غيّر الكارت",
+    "skip": "تخطى",
+    "points": "نقطة",
+    "scoreboard": "لوحة النتايج",
+    "nextRound": "الجولة الجاية",
+    "newGame": "لعبة جديدة",
+    "gameOver": "اللعبة خلصت!",
+    "winner": "الفايز",
+    "tied": "تعادل!",
+    "playAgain": "العب تاني",
+    "continueGame": "تكمّل اللعبة؟",
+    "continueGameDesc": "عندك لعبة مكملتهاش. عايز تكمّل؟",
+    "continueBtn": "كمّل",
+    "dismiss": "ابدأ جديد",
+    "yourTurn": "دورك! اختار كارت."
+  },
   "footer": {
     "tagline": "ألعاب ورق مجانية لقعدتك الجاية.",
     "rights": "جميع الحقوق محفوظة."
