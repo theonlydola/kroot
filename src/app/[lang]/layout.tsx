@@ -5,7 +5,6 @@ import { Cairo } from "next/font/google";
 import "../globals.css";
 import { locales, type Locale, getDirection } from "@/lib/i18n";
 import { hasLocale, getDictionary } from "./dictionaries";
-import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { Header } from "@/components/layout/header";
@@ -132,6 +131,15 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${cairo.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT}`}
+            crossOrigin="anonymous"
+          />
+        )}
+      </head>
       <body
         className={`min-h-full flex flex-col bg-background text-foreground ${isArabic ? "font-[family-name:var(--font-cairo)]" : "font-[family-name:var(--font-geist-sans)]"}`}
       >
@@ -145,13 +153,6 @@ export default async function RootLayout({
           <main className="flex flex-1 flex-col">{children}</main>
           <Footer lang={locale} />
         </ThemeProvider>
-        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT && (
-          <Script
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT}`}
-            strategy="afterInteractive"
-            crossOrigin="anonymous"
-          />
-        )}
       </body>
     </html>
   );
