@@ -5,12 +5,17 @@ import Negotiator from "negotiator";
 import { locales, defaultLocale } from "@/lib/i18n";
 
 function getLocale(request: NextRequest): string {
-  const headers: Record<string, string> = {};
-  request.headers.forEach((value, key) => {
-    headers[key] = value;
-  });
-  const languages = new Negotiator({ headers }).languages();
-  return match(languages, [...locales], defaultLocale);
+  try {
+    const headers: Record<string, string> = {};
+    request.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    const languages = new Negotiator({ headers }).languages().filter((l) => l !== "*");
+    if (languages.length === 0) return defaultLocale;
+    return match(languages, [...locales], defaultLocale);
+  } catch {
+    return defaultLocale;
+  }
 }
 
 export function proxy(request: NextRequest) {
@@ -24,6 +29,12 @@ export function proxy(request: NextRequest) {
 
   const locale = getLocale(request);
   request.nextUrl.pathname = `/${locale}${pathname}`;
+
+  // Rewrite root path so crawlers (e.g. AdSense) see content at /
+  if (pathname === "/") {
+    return NextResponse.rewrite(request.nextUrl);
+  }
+
   return NextResponse.redirect(request.nextUrl);
 }
 

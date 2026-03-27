@@ -11,7 +11,9 @@ export function LanguageSwitcher({
 }) {
   const pathname = usePathname();
   const targetLang = lang === "en" ? "ar" : "en";
-  const newPath = pathname.replace(`/${lang}`, `/${targetLang}`);
+  const newPath = pathname.startsWith(`/${lang}`)
+    ? pathname.replace(`/${lang}`, `/${targetLang}`)
+    : `/${targetLang}${pathname}`;
 
   return (
     <a
