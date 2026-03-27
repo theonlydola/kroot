@@ -6,7 +6,7 @@ import { locales, type Locale, getDirection } from "@/lib/i18n";
 import { hasLocale, getDictionary } from "@/app/[lang]/dictionaries";
 import { games, getGameBySlug, getImposterGame, getTruthOrDareGame } from "@/data/games";
 import { GamePlay } from "@/components/game/game-play";
-import { ImposterGame } from "@/components/game/imposter-game";
+import { ImposterWithMode } from "@/components/game/imposter-with-mode";
 import { BadPeopleGame } from "@/components/game/bad-people-game";
 import { TruthOrDareGame } from "@/components/game/truth-or-dare-game";
 import { PlayerIconsProvider } from "@/components/game/shared/player-icons-context";
@@ -121,9 +121,10 @@ export default async function GamePage({
       {/* Game play */}
       <PlayerIconsProvider>
       {game.slug === "imposter" ? (
-        <ImposterGame
+        <ImposterWithMode
           categories={getImposterGame().categories[locale]}
           dict={dict.imposter}
+          onlineDict={dict.online}
           slug={slug}
           lang={locale}
         />
