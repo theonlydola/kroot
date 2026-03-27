@@ -9,10 +9,16 @@ import {
   Crown,
   Check,
   Eye,
-  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trackGameStart, trackGamePlayersNumber } from "@/lib/mixpanel";
+import { shuffle, createGameStorage } from "@/lib/game-utils";
+import { usePlayerIcons } from "./shared/player-icons-context";
+import { ResumeDialog } from "./shared/resume-dialog";
+import { PlayerSetup } from "./shared/player-setup";
+import { Scoreboard } from "./shared/scoreboard";
+import { GameOver } from "./shared/game-over";
+import { PlayerVoteGrid } from "./shared/player-vote-grid";
 
 // ─── Types ───────────────────────────────────────────────────────
 type BadPeopleDict = {
@@ -57,11 +63,6 @@ type BadPeopleGameProps = {
 };
 
 // ─── Constants ───────────────────────────────────────────────────
-const PLAYER_ICONS = [
-  "🐨", "🦁", "🐯", "🐴", "🐱", "🐶", "🐬", "🐵", "🐦", "🦆",
-];
-const STORAGE_KEY = "kroot-bad-people-game";
-
 type Phase =
   | "setup"
   | "master-vote"
@@ -79,57 +80,24 @@ type GameState = {
   masterIndex: number;
   currentQuestion: number;
   masterVote: number;
-  votes: number[]; // index = player, value = who they voted for
+  votes: number[];
   currentVoter: number;
   usedQuestions: number[];
 };
 
-// ─── LocalStorage helpers ────────────────────────────────────────
-function saveGame(state: GameState) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // ignore quota errors
-  }
-}
-
-function loadGame(): GameState | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as GameState;
-  } catch {
-    return null;
-  }
-}
-
-function clearGame() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+const storage = createGameStorage<GameState>("kroot-bad-people-game");
 
 // ─── Component ───────────────────────────────────────────────────
 export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
+  const PLAYER_ICONS = usePlayerIcons();
   const [savedGame] = useState<GameState | null>(() => {
     if (typeof window === "undefined") return null;
-    const saved = loadGame();
+    const saved = storage.load();
     return saved && saved.phase !== "setup" ? saved : null;
   });
   const [showResume, setShowResume] = useState(() => {
     if (typeof window === "undefined") return false;
-    const saved = loadGame();
+    const saved = storage.load();
     return saved != null && saved.phase !== "setup";
   });
 
@@ -172,7 +140,7 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
         usedQuestions: shuffledCards,
         ...overrides,
       };
-      saveGame(state);
+      storage.save(state);
     },
     [phase, numPlayers, playerNames, scores, round, masterIndex, currentQuestion, masterVote, votes, currentVoter, shuffledCards],
   );
@@ -206,7 +174,6 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
     setVotes(Array(numPlayers).fill(-1));
     setVoterRevealed(false);
 
-    // First non-master voter
     const firstVoter = 1 % numPlayers === 0 ? 1 : 1;
     setCurrentVoter(firstVoter);
 
@@ -233,7 +200,6 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
     (playerIdx: number) => {
       setMasterVote(playerIdx);
 
-      // Find first non-master voter
       const firstVoter = (masterIndex + 1) % numPlayers;
       setCurrentVoter(firstVoter);
       setVoterRevealed(false);
@@ -270,12 +236,10 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
       newVotes[currentVoter] = playerIdx;
       setVotes(newVotes);
 
-      // Check if all non-master players have voted
       const allVoted = newVotes.every((v, i) => i === masterIndex || v !== -1);
 
       if (allVoted) {
         setPhase("round-results");
-        // Award points
         const newScores = [...scores];
         for (let i = 0; i < numPlayers; i++) {
           if (i !== masterIndex && newVotes[i] === masterVote) {
@@ -336,7 +300,7 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
 
   // New game
   const newGame = useCallback(() => {
-    clearGame();
+    storage.clear();
     setPhase("setup");
     setRound(1);
     setMasterIndex(0);
@@ -357,30 +321,17 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
   // ─── Render: Resume Dialog ─────────────────────────────────────
   if (showResume && savedGame) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mx-auto w-full max-w-md rounded-2xl border border-border bg-card p-6 text-center shadow-lg"
-      >
-        <h2 className="mb-2 text-xl font-bold text-foreground">
-          {dict.continueGame}
-        </h2>
-        <p className="mb-6 text-sm text-muted-foreground">
-          {dict.continueGameDesc}
-        </p>
-        <div className="flex justify-center gap-3">
-          <Button onClick={resumeGame}>{dict.continueBtn}</Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              clearGame();
-              setShowResume(false);
-            }}
-          >
-            {dict.dismiss}
-          </Button>
-        </div>
-      </motion.div>
+      <ResumeDialog
+        title={dict.continueGame}
+        description={dict.continueGameDesc}
+        continueLabel={dict.continueBtn}
+        dismissLabel={dict.dismiss}
+        onResume={resumeGame}
+        onDismiss={() => {
+          storage.clear();
+          setShowResume(false);
+        }}
+      />
     );
   }
 
@@ -396,61 +347,20 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
           {dict.setupTitle}
         </h2>
 
-        {/* Number of players */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">
-            {dict.numberOfPlayers}
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 8 }, (_, i) => i + 3).map((n) => (
-              <button
-                key={n}
-                type="button"
-                onClick={() => {
-                  setNumPlayers(n);
-                  setPlayerNames((prev) => {
-                    const next = [...prev];
-                    next.length = n;
-                    return next;
-                  });
-                }}
-                className={`flex size-10 items-center justify-center rounded-full border text-sm font-medium transition-colors ${
-                  numPlayers === n
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background text-foreground hover:bg-muted"
-                }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Player names */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">
-            {dict.enterNames}
-          </label>
-          <div className="space-y-2">
-            {Array.from({ length: numPlayers }).map((_, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-xl">{PLAYER_ICONS[i]}</span>
-                <input
-                  type="text"
-                  placeholder={`${dict.player} ${i + 1}`}
-                  value={playerNames[i] || ""}
-                  onChange={(e) => {
-                    const next = [...playerNames];
-                    next[i] = e.target.value;
-                    setPlayerNames(next);
-                  }}
-                  maxLength={20}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <PlayerSetup
+          numPlayers={numPlayers}
+          minPlayers={3}
+          maxPlayers={10}
+          playerNames={playerNames}
+          onNumPlayersChange={setNumPlayers}
+          onPlayerNamesChange={setPlayerNames}
+          labels={{
+            numberOfPlayers: dict.numberOfPlayers,
+            player: dict.player,
+            enterNames: dict.enterNames,
+          }}
+          variant="list"
+        />
 
         <Button className="w-full" size="lg" onClick={startGame}>
           <Play className="size-4" />
@@ -502,22 +412,12 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
           {dict.votesFirst}
         </p>
 
-        {/* Player buttons to vote */}
-        <div className="grid grid-cols-2 gap-2">
-          {Array.from({ length: numPlayers }).map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => submitMasterVote(i)}
-              className="flex items-center gap-2 rounded-xl border border-border bg-background p-3 text-start transition-colors hover:bg-muted active:scale-95"
-            >
-              <span className="text-xl">{PLAYER_ICONS[i]}</span>
-              <span className="text-sm font-medium text-foreground">
-                {getPlayerName(i)}
-              </span>
-            </button>
-          ))}
-        </div>
+        <PlayerVoteGrid
+          numPlayers={numPlayers}
+          getPlayerName={getPlayerName}
+          onVote={submitMasterVote}
+          layout="grid"
+        />
       </motion.div>
     );
   }
@@ -590,22 +490,12 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
           {dict.tapToVote}
         </p>
 
-        {/* Player buttons */}
-        <div className="grid grid-cols-2 gap-2">
-          {Array.from({ length: numPlayers }).map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => submitPlayerVote(i)}
-              className="flex items-center gap-2 rounded-xl border border-border bg-background p-3 text-start transition-colors hover:bg-muted active:scale-95"
-            >
-              <span className="text-xl">{PLAYER_ICONS[i]}</span>
-              <span className="text-sm font-medium text-foreground">
-                {getPlayerName(i)}
-              </span>
-            </button>
-          ))}
-        </div>
+        <PlayerVoteGrid
+          numPlayers={numPlayers}
+          getPlayerName={getPlayerName}
+          onVote={submitPlayerVote}
+          layout="grid"
+        />
       </motion.div>
     );
   }
@@ -679,37 +569,12 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
           })}
         </div>
 
-        {/* Scoreboard */}
-        <div>
-          <h3 className="mb-2 text-sm font-semibold text-foreground">
-            {dict.scoreboard}
-          </h3>
-          <div className="space-y-1.5">
-            {[...Array.from({ length: numPlayers }, (_, i) => i)]
-              .sort((a, b) => scores[b] - scores[a])
-              .map((i, rank) => (
-                <div
-                  key={i}
-                  className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                    rank === 0
-                      ? "bg-amber-50 dark:bg-amber-900/20"
-                      : "bg-background"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    {rank === 0 && <Trophy className="size-4 text-amber-500" />}
-                    <span className="text-lg">{PLAYER_ICONS[i]}</span>
-                    <span className="text-sm font-medium text-foreground">
-                      {getPlayerName(i)}
-                    </span>
-                  </div>
-                  <span className="text-sm font-bold text-foreground">
-                    {scores[i]}
-                  </span>
-                </div>
-              ))}
-          </div>
-        </div>
+        <Scoreboard
+          scores={scores}
+          numPlayers={numPlayers}
+          getPlayerName={getPlayerName}
+          title={dict.scoreboard}
+        />
 
         {/* Actions */}
         <div className="flex gap-3">
@@ -740,77 +605,19 @@ export function BadPeopleGame({ cards, dict, slug, lang }: BadPeopleGameProps) {
 
   // ─── Render: Game Over Phase ───────────────────────────────────
   if (phase === "game-over") {
-    const maxScore = Math.max(...scores);
-    const winners = scores
-      .map((s, i) => (s === maxScore ? i : -1))
-      .filter((i) => i >= 0);
-    const isTied = winners.length > 1;
-
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="mx-auto w-full max-w-md space-y-6 rounded-2xl border border-border bg-card p-6 text-center shadow-lg"
-      >
-        <h2 className="text-2xl font-bold text-foreground">
-          🎉 {dict.gameOver}
-        </h2>
-
-        {/* Winner */}
-        <div className="flex flex-col items-center gap-2">
-          <Trophy className="size-10 text-amber-500" />
-          <p className="text-sm font-medium text-muted-foreground">
-            {isTied ? dict.tied : dict.winner}
-          </p>
-          <div className="flex items-center gap-3">
-            {winners.map((i) => (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <span className="text-4xl">{PLAYER_ICONS[i]}</span>
-                <span className="text-lg font-bold text-foreground">
-                  {getPlayerName(i)}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {scores[i]} pts
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Full scoreboard */}
-        <div className="space-y-1.5">
-          {[...Array.from({ length: numPlayers }, (_, i) => i)]
-            .sort((a, b) => scores[b] - scores[a])
-            .map((i, rank) => (
-              <div
-                key={i}
-                className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                  rank === 0
-                    ? "bg-amber-50 dark:bg-amber-900/20"
-                    : "bg-background"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    #{rank + 1}
-                  </span>
-                  <span className="text-lg">{PLAYER_ICONS[i]}</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {getPlayerName(i)}
-                  </span>
-                </div>
-                <span className="text-sm font-bold text-foreground">
-                  {scores[i]}
-                </span>
-              </div>
-            ))}
-        </div>
-
-        <Button className="w-full" size="lg" onClick={newGame}>
-          <RotateCcw className="size-4" />
-          {dict.playAgain}
-        </Button>
-      </motion.div>
+      <GameOver
+        scores={scores}
+        numPlayers={numPlayers}
+        getPlayerName={getPlayerName}
+        labels={{
+          gameOver: dict.gameOver,
+          winner: dict.winner,
+          tied: dict.tied,
+          playAgain: dict.playAgain,
+        }}
+        onPlayAgain={newGame}
+      />
     );
   }
 

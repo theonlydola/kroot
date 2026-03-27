@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Play,
   RotateCcw,
   ChevronRight,
-  Timer,
   Eye,
   Sparkles,
   Check,
@@ -14,6 +13,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trackGameStart, trackGamePlayersNumber } from "@/lib/mixpanel";
+import { createGameStorage } from "@/lib/game-utils";
+import { usePlayerIcons } from "./shared/player-icons-context";
+import { ResumeDialog } from "./shared/resume-dialog";
+import { PlayerSetup } from "./shared/player-setup";
+import { CountdownTimer } from "./shared/countdown-timer";
+import { PlayerVoteGrid } from "./shared/player-vote-grid";
+import { PlayerIconStrip } from "./shared/player-icon-strip";
+import { RoundInfo } from "./shared/round-info";
 
 // ─── Types ───────────────────────────────────────────────────────
 type CategoryKey = "food" | "animals" | "objects";
@@ -71,20 +78,7 @@ type ImposterGameProps = {
 };
 
 // ─── Constants ───────────────────────────────────────────────────
-const PLAYER_ICONS = [
-  "🐨",
-  "🦁",
-  "🐯",
-  "🐴",
-  "🐱",
-  "🐶",
-  "🐬",
-  "🐵",
-  "🐦",
-  "🦆",
-];
 const ROUND_OPTIONS = [3, 5, 7, 10];
-const STORAGE_KEY = "kroot-imposter-game";
 
 type Phase =
   | "setup"
@@ -112,43 +106,24 @@ type GameState = {
   playerNames: string[];
 };
 
-// ─── LocalStorage helpers ────────────────────────────────────────
-function saveGame(state: GameState) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // ignore quota errors
-  }
-}
-
-function loadGame(): GameState | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as GameState;
-  } catch {
-    return null;
-  }
-}
-
-function clearGame() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
-}
+const storage = createGameStorage<GameState>("kroot-imposter-game");
 
 // ─── Component ───────────────────────────────────────────────────
-export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps) {
+export function ImposterGame({
+  categories,
+  dict,
+  slug,
+  lang,
+}: ImposterGameProps) {
+  const PLAYER_ICONS = usePlayerIcons();
   const [savedGame, setSavedGame] = useState<GameState | null>(() => {
     if (typeof window === "undefined") return null;
-    const saved = loadGame();
+    const saved = storage.load();
     return saved && saved.phase !== "setup" ? saved : null;
   });
   const [showResume, setShowResume] = useState(() => {
     if (typeof window === "undefined") return false;
-    const saved = loadGame();
+    const saved = storage.load();
     return saved != null && saved.phase !== "setup";
   });
 
@@ -173,7 +148,6 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
   const [revealed, setRevealed] = useState(false);
   const [scores, setScores] = useState<number[]>([]);
   const [timerEnd, setTimerEnd] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(0);
   const [votes, setVotes] = useState<number[]>([]);
   const [currentVoter, setCurrentVoter] = useState(0);
   const [voterRevealed, setVoterRevealed] = useState(false);
@@ -183,63 +157,6 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
   const [imposterGuessResult, setImposterGuessResult] = useState<
     boolean | null
   >(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Timer effect
-  useEffect(() => {
-    if (phase !== "timer") return;
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    timerRef.current = setInterval(() => {
-      const remaining = Math.max(0, Math.floor((timerEnd - Date.now()) / 1000));
-      setTimeLeft(remaining);
-      if (remaining <= 0) {
-        if (timerRef.current) clearInterval(timerRef.current);
-        setPhase("voting");
-      }
-    }, 250);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [phase, timerEnd]);
-
-  // Persist game state on changes
-  useEffect(() => {
-    if (phase === "setup") return;
-    const state: GameState = {
-      phase,
-      numPlayers,
-      category,
-      roundMinutes,
-      round,
-      imposterIndex,
-      word,
-      currentCard,
-      revealed,
-      scores,
-      timerEnd,
-      votes,
-      currentVoter,
-      playerNames,
-    };
-    saveGame(state);
-  }, [
-    phase,
-    numPlayers,
-    category,
-    roundMinutes,
-    round,
-    imposterIndex,
-    word,
-    currentCard,
-    revealed,
-    scores,
-    timerEnd,
-    votes,
-    currentVoter,
-    playerNames,
-  ]);
 
   const resumeGame = useCallback(() => {
     if (!savedGame) return;
@@ -263,7 +180,7 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
   }, [savedGame]);
 
   const dismissSavedGame = useCallback(() => {
-    clearGame();
+    storage.clear();
     setSavedGame(null);
     setShowResume(false);
   }, []);
@@ -286,7 +203,24 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
     setPhase("dealing");
     trackGameStart(slug, lang);
     trackGamePlayersNumber(slug, numPlayers);
-  }, [categories, category, numPlayers, slug, lang]);
+
+    storage.save({
+      phase: "dealing",
+      numPlayers,
+      category,
+      roundMinutes,
+      round: 1,
+      imposterIndex: impIdx,
+      word: pick.word,
+      currentCard: 0,
+      revealed: false,
+      scores: Array(numPlayers).fill(0),
+      timerEnd: 0,
+      votes: [],
+      currentVoter: 0,
+      playerNames,
+    });
+  }, [categories, category, numPlayers, slug, lang, roundMinutes, playerNames]);
 
   const startNewRound = useCallback(() => {
     const pool = categories[category];
@@ -316,7 +250,6 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
       setCurrentCard((c) => c + 1);
       setRevealed(false);
     } else {
-      // All players have seen their cards — start timer phase
       const end = Date.now() + roundMinutes * 60 * 1000;
       setTimerEnd(end);
       setPhase("timer");
@@ -333,7 +266,6 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
         setCurrentVoter((c) => c + 1);
         setVoterRevealed(false);
       } else {
-        // All votes in — award points for correct guesses
         const newScores = [...scores];
         for (let i = 0; i < numPlayers; i++) {
           if (i !== imposterIndex && newVotes[i] === imposterIndex) {
@@ -342,7 +274,6 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
         }
         setScores(newScores);
 
-        // Build word options for imposter guess
         const pool = categories[category];
         const others = pool.map((p) => p.word).filter((w) => w !== word);
         const picks = others.sort(() => Math.random() - 0.5).slice(0, 4);
@@ -381,16 +312,10 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
   );
 
   const resetToSetup = useCallback(() => {
-    clearGame();
+    storage.clear();
     setPhase("setup");
     setRound(1);
   }, []);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  };
 
   const categoryLabels: Record<CategoryKey, string> = {
     food: dict.food,
@@ -401,20 +326,14 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
   // ─── Resume prompt ─────────────────────────────────────────────
   if (showResume) {
     return (
-      <div className="flex flex-col items-center gap-6">
-        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 text-center shadow-lg">
-          <h2 className="mb-2 text-xl font-bold">{dict.continueGame}</h2>
-          <p className="mb-6 text-sm text-muted-foreground">
-            {dict.continueGameDesc}
-          </p>
-          <div className="flex justify-center gap-3">
-            <Button variant="outline" onClick={dismissSavedGame}>
-              {dict.dismiss}
-            </Button>
-            <Button onClick={resumeGame}>{dict.continueBtn}</Button>
-          </div>
-        </div>
-      </div>
+      <ResumeDialog
+        title={dict.continueGame}
+        description={dict.continueGameDesc}
+        continueLabel={dict.continueBtn}
+        dismissLabel={dict.dismiss}
+        onResume={resumeGame}
+        onDismiss={dismissSavedGame}
+      />
     );
   }
 
@@ -427,51 +346,19 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
             {dict.setupTitle}
           </h2>
 
-          {/* Number of Players */}
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-foreground">
-              {dict.numberOfPlayers}
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {Array.from({ length: 7 }, (_, i) => i + 4).map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onTouchStart={() => setNumPlayers(n)}
-                  onClick={() => setNumPlayers(n)}
-                  className={`flex size-10 items-center justify-center rounded-xl border text-sm font-medium transition-all touch-manipulation ${
-                    numPlayers === n
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-background hover:bg-muted"
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-            {/* Player names */}
-            <div className="mt-3 flex flex-wrap gap-2">
-              {PLAYER_ICONS.slice(0, numPlayers).map((icon, i) => (
-                <div key={i} className="flex flex-col items-center gap-1">
-                  <span className="text-2xl">{icon}</span>
-                  <input
-                    type="text"
-                    inputMode="text"
-                    placeholder={`${dict.player} ${i + 1}`}
-                    value={playerNames[i] ?? ""}
-                    onChange={(e) => {
-                      setPlayerNames((prev) => {
-                        const next = [...prev];
-                        next[i] = e.target.value;
-                        return next;
-                      });
-                    }}
-                    className="w-16 rounded-md border border-border bg-background px-1.5 py-0.5 text-center text-[11px] text-foreground outline-none focus:border-primary touch-manipulation"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <PlayerSetup
+            numPlayers={numPlayers}
+            minPlayers={4}
+            maxPlayers={10}
+            playerNames={playerNames}
+            onNumPlayersChange={setNumPlayers}
+            onPlayerNamesChange={setPlayerNames}
+            labels={{
+              numberOfPlayers: dict.numberOfPlayers,
+              player: dict.player,
+            }}
+            variant="compact"
+          />
 
           {/* Category */}
           <div className="mb-6">
@@ -538,37 +425,23 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
 
     return (
       <div className="flex flex-col items-center gap-6">
-        {/* Round & progress */}
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
-            {dict.round} {round}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {getPlayerName(currentCard)} / {numPlayers}
-          </span>
-        </div>
-
-        {/* Player icons strip */}
-        <div className="flex gap-2">
-          {PLAYER_ICONS.slice(0, numPlayers).map((icon, i) => (
-            <span
-              key={i}
-              className={`text-2xl transition-opacity flex flex-col items-center ${
-                i < currentCard
-                  ? "opacity-30"
-                  : i === currentCard
-                    ? "scale-110"
-                    : "opacity-60"
-              }`}
-            >
-              {icon}
-              <span className="text-xs text-muted-foreground">
-                {getPlayerName(i)}
-              </span>
-              <span className="text-xs text-muted-foreground">{scores[i]}</span>
+        <RoundInfo
+          round={round}
+          label={dict.round}
+          extra={
+            <span className="text-sm text-muted-foreground">
+              {getPlayerName(currentCard)}
             </span>
-          ))}
-        </div>
+          }
+        />
+
+        <PlayerIconStrip
+          numPlayers={numPlayers}
+          scores={scores}
+          currentIndex={currentCard}
+          getPlayerName={getPlayerName}
+          variant="progress"
+        />
 
         {/* Card */}
         <AnimatePresence mode="wait">
@@ -595,11 +468,9 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
                 <div className="flex flex-col items-center gap-4">
                   <span className="text-5xl">{playerIcon}</span>
                   {isImposter ? (
-                    <>
-                      <p className="text-lg font-bold text-red-500">
-                        {dict.youAreImposter}
-                      </p>
-                    </>
+                    <p className="text-lg font-bold text-red-500">
+                      {dict.youAreImposter}
+                    </p>
                   ) : (
                     <>
                       <p className="text-sm text-muted-foreground">
@@ -644,69 +515,21 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
 
   // ─── Timer Phase ───────────────────────────────────────────────
   if (phase === "timer") {
-    const totalSeconds = roundMinutes * 60;
-    const progress = totalSeconds > 0 ? timeLeft / totalSeconds : 0;
-    const isLow = timeLeft <= 30;
-
     return (
       <div className="flex flex-col items-center gap-8">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>
-            {dict.round} {round}
-          </span>
-        </div>
+        <RoundInfo round={round} label={dict.round} />
 
-        <div className="relative flex size-52 items-center justify-center">
-          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 208 208">
-            <circle
-              cx="104"
-              cy="104"
-              r="96"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="6"
-              className="text-muted/30"
-            />
-            <circle
-              cx="104"
-              cy="104"
-              r="96"
-              fill="none"
-              strokeWidth="6"
-              strokeDasharray={2 * Math.PI * 96}
-              strokeDashoffset={2 * Math.PI * 96 * (1 - progress)}
-              strokeLinecap="round"
-              className={`transition-all duration-500 ${
-                isLow ? "text-red-500" : "text-primary"
-              }`}
-              stroke="currentColor"
-            />
-          </svg>
-          <div className="flex flex-col items-center">
-            <Timer
-              className={`mb-1 size-6 ${isLow ? "text-red-500 animate-pulse" : "text-muted-foreground"}`}
-            />
-            <span
-              className={`text-4xl font-bold tabular-nums ${isLow ? "text-red-500" : ""}`}
-            >
-              {formatTime(timeLeft)}
-            </span>
-          </div>
-        </div>
+        <CountdownTimer
+          endTime={timerEnd}
+          totalSeconds={roundMinutes * 60}
+          onTimeUp={() => setPhase("voting")}
+        />
 
-        {/* Player icons for reference */}
-        <div className="flex gap-3">
-          {PLAYER_ICONS.slice(0, numPlayers).map((icon, i) => (
-            <div key={i} className="flex flex-col items-center gap-1">
-              <span className={`text-2xl ${i === imposterIndex ? "" : ""}`}>
-                {icon}
-              </span>
-              <span className="text-[10px] text-muted-foreground">
-                {scores[i] ?? 0}
-              </span>
-            </div>
-          ))}
-        </div>
+        <PlayerIconStrip
+          numPlayers={numPlayers}
+          scores={scores}
+          variant="vertical"
+        />
 
         <Button variant="outline" onClick={() => setPhase("voting")}>
           {dict.voteNow}
@@ -724,29 +547,14 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
             {dict.round} {round}
           </span>
           <span>•</span>
-          <span>
-            {getPlayerName(currentVoter)}
-          </span>
+          <span>{getPlayerName(currentVoter)}</span>
         </div>
 
-        {/* Player icons strip */}
-        <div className="flex gap-2">
-          {PLAYER_ICONS.slice(0, numPlayers).map((icon, i) => (
-            <span
-              key={i}
-              className={`text-2xl transition-opacity ${
-                i < currentVoter
-                  ? "opacity-30"
-                  : i === currentVoter
-                    ? "scale-110"
-                    : "opacity-60"
-              }`}
-            >
-              {icon}
-              {}
-            </span>
-          ))}
-        </div>
+        <PlayerIconStrip
+          numPlayers={numPlayers}
+          currentIndex={currentVoter}
+          variant="progress"
+        />
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -775,24 +583,13 @@ export function ImposterGame({ categories, dict, slug, lang }: ImposterGameProps
                 <p className="mt-3 mb-4 text-lg font-bold">
                   {dict.whoIsImposter}
                 </p>
-                <div className="flex flex-wrap justify-center gap-3">
-                  {PLAYER_ICONS.slice(0, numPlayers).map((icon, i) => {
-                    if (i === currentVoter) return null;
-                    return (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => handleVote(i)}
-                        className="touch-manipulation flex flex-col items-center gap-1 rounded-xl border border-border bg-background p-3 transition-all hover:bg-muted active:scale-95"
-                      >
-                        <span className="text-3xl">{icon}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {getPlayerName(i)}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                <PlayerVoteGrid
+                  numPlayers={numPlayers}
+                  getPlayerName={getPlayerName}
+                  excludeIndices={[currentVoter]}
+                  onVote={handleVote}
+                  layout="wrap"
+                />
               </div>
             )}
           </motion.div>

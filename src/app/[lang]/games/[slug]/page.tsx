@@ -9,6 +9,7 @@ import { GamePlay } from "@/components/game/game-play";
 import { ImposterGame } from "@/components/game/imposter-game";
 import { BadPeopleGame } from "@/components/game/bad-people-game";
 import { TruthOrDareGame } from "@/components/game/truth-or-dare-game";
+import { PlayerIconsProvider } from "@/components/game/shared/player-icons-context";
 
 export async function generateStaticParams() {
   return locales.flatMap((lang) =>
@@ -118,6 +119,7 @@ export default async function GamePage({
       </div>
 
       {/* Game play */}
+      <PlayerIconsProvider>
       {game.slug === "imposter" ? (
         <ImposterGame
           categories={getImposterGame().categories[locale]}
@@ -143,6 +145,7 @@ export default async function GamePage({
       ) : (
         <GamePlay cards={game.cards![locale]} dict={dict.game} isRtl={isRtl} />
       )}
+      </PlayerIconsProvider>
 
       {/* JSON-LD structured data */}
       <script

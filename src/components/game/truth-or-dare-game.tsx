@@ -2,9 +2,16 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, RotateCcw, ChevronRight, Trophy, Eye } from "lucide-react";
+import { Play, RotateCcw, ChevronRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trackGameStart, trackGamePlayersNumber } from "@/lib/mixpanel";
+import { shuffle, createGameStorage } from "@/lib/game-utils";
+import { usePlayerIcons } from "./shared/player-icons-context";
+import { ResumeDialog } from "./shared/resume-dialog";
+import { PlayerSetup } from "./shared/player-setup";
+import { Scoreboard } from "./shared/scoreboard";
+import { GameOver } from "./shared/game-over";
+import { PlayerIconStrip } from "./shared/player-icon-strip";
 
 // ─── Types ───────────────────────────────────────────────────────
 type TruthOrDareDict = {
@@ -44,10 +51,6 @@ type TruthOrDareGameProps = {
 };
 
 // ─── Constants ───────────────────────────────────────────────────
-const PLAYER_ICONS = [
-  "🐨", "🦁", "🐯", "🐴", "🐱", "🐶", "🐬", "🐵", "🐦", "🦆",
-];
-const STORAGE_KEY = "kroot-truth-or-dare-game";
 const TOTAL_ROUNDS = 10;
 
 type Phase =
@@ -71,52 +74,19 @@ type GameState = {
   roundPoints: number | null;
 };
 
-// ─── LocalStorage helpers ────────────────────────────────────────
-function saveGame(state: GameState) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // ignore quota errors
-  }
-}
-
-function loadGame(): GameState | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as GameState;
-  } catch {
-    return null;
-  }
-}
-
-function clearGame() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+const storage = createGameStorage<GameState>("kroot-truth-or-dare-game");
 
 // ─── Component ───────────────────────────────────────────────────
 export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDareGameProps) {
+  const PLAYER_ICONS = usePlayerIcons();
   const [savedGame] = useState<GameState | null>(() => {
     if (typeof window === "undefined") return null;
-    const saved = loadGame();
+    const saved = storage.load();
     return saved && saved.phase !== "setup" ? saved : null;
   });
   const [showResume, setShowResume] = useState(() => {
     if (typeof window === "undefined") return false;
-    const saved = loadGame();
+    const saved = storage.load();
     return saved != null && saved.phase !== "setup";
   });
 
@@ -156,7 +126,7 @@ export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDare
         roundPoints,
         ...overrides,
       };
-      saveGame(state);
+      storage.save(state);
     },
     [phase, numPlayers, playerNames, scores, round, currentPlayerIndex, shuffledTruths, shuffledDares, firstChoice, roundPoints],
   );
@@ -287,7 +257,7 @@ export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDare
 
   // New game
   const newGame = useCallback(() => {
-    clearGame();
+    storage.clear();
     setPhase("setup");
     setRound(1);
     setCurrentPlayerIndex(0);
@@ -299,30 +269,17 @@ export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDare
   // ─── Render: Resume Dialog ─────────────────────────────────────
   if (showResume && savedGame) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mx-auto w-full max-w-md rounded-2xl border border-border bg-card p-6 text-center shadow-lg"
-      >
-        <h2 className="mb-2 text-xl font-bold text-foreground">
-          {dict.continueGame}
-        </h2>
-        <p className="mb-6 text-sm text-muted-foreground">
-          {dict.continueGameDesc}
-        </p>
-        <div className="flex justify-center gap-3">
-          <Button onClick={resumeGame}>{dict.continueBtn}</Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              clearGame();
-              setShowResume(false);
-            }}
-          >
-            {dict.dismiss}
-          </Button>
-        </div>
-      </motion.div>
+      <ResumeDialog
+        title={dict.continueGame}
+        description={dict.continueGameDesc}
+        continueLabel={dict.continueBtn}
+        dismissLabel={dict.dismiss}
+        onResume={resumeGame}
+        onDismiss={() => {
+          storage.clear();
+          setShowResume(false);
+        }}
+      />
     );
   }
 
@@ -338,61 +295,20 @@ export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDare
           {dict.setupTitle}
         </h2>
 
-        {/* Number of players */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">
-            {dict.numberOfPlayers}
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 9 }, (_, i) => i + 2).map((n) => (
-              <button
-                key={n}
-                type="button"
-                onClick={() => {
-                  setNumPlayers(n);
-                  setPlayerNames((prev) => {
-                    const next = [...prev];
-                    next.length = n;
-                    return next;
-                  });
-                }}
-                className={`flex size-10 items-center justify-center rounded-full border text-sm font-medium transition-colors ${
-                  numPlayers === n
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background text-foreground hover:bg-muted"
-                }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Player names */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-foreground">
-            {dict.enterNames}
-          </label>
-          <div className="space-y-2">
-            {Array.from({ length: numPlayers }).map((_, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-xl">{PLAYER_ICONS[i]}</span>
-                <input
-                  type="text"
-                  placeholder={`${dict.player} ${i + 1}`}
-                  value={playerNames[i] || ""}
-                  onChange={(e) => {
-                    const next = [...playerNames];
-                    next[i] = e.target.value;
-                    setPlayerNames(next);
-                  }}
-                  maxLength={20}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <PlayerSetup
+          numPlayers={numPlayers}
+          minPlayers={2}
+          maxPlayers={10}
+          playerNames={playerNames}
+          onNumPlayersChange={setNumPlayers}
+          onPlayerNamesChange={setPlayerNames}
+          labels={{
+            numberOfPlayers: dict.numberOfPlayers,
+            player: dict.player,
+            enterNames: dict.enterNames,
+          }}
+          variant="list"
+        />
 
         <Button className="w-full" size="lg" onClick={startGame}>
           <Play className="size-4" />
@@ -457,21 +373,12 @@ export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDare
         </div>
 
         {/* Mini scoreboard */}
-        <div className="flex flex-wrap justify-center gap-2">
-          {Array.from({ length: numPlayers }).map((_, i) => (
-            <div
-              key={i}
-              className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs ${
-                i === currentPlayerIndex
-                  ? "bg-primary/10 font-bold text-primary"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              <span>{PLAYER_ICONS[i]}</span>
-              <span>{scores[i]}</span>
-            </div>
-          ))}
-        </div>
+        <PlayerIconStrip
+          numPlayers={numPlayers}
+          scores={scores}
+          currentIndex={currentPlayerIndex}
+          variant="compact"
+        />
       </motion.div>
     );
   }
@@ -531,11 +438,7 @@ export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDare
 
           {/* Actions */}
           <div className="flex gap-3">
-            <Button
-              className="flex-1"
-              size="lg"
-              onClick={fulfillFirst}
-            >
+            <Button className="flex-1" size="lg" onClick={fulfillFirst}>
               {dict.done} (+2)
             </Button>
             <Button
@@ -607,11 +510,7 @@ export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDare
 
           {/* Actions */}
           <div className="flex gap-3">
-            <Button
-              className="flex-1"
-              size="lg"
-              onClick={fulfillSecond}
-            >
+            <Button className="flex-1" size="lg" onClick={fulfillSecond}>
               {dict.done} (+1)
             </Button>
             <Button
@@ -656,37 +555,12 @@ export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDare
           </div>
         </div>
 
-        {/* Scoreboard */}
-        <div>
-          <h3 className="mb-2 text-sm font-semibold text-foreground">
-            {dict.scoreboard}
-          </h3>
-          <div className="space-y-1.5">
-            {[...Array.from({ length: numPlayers }, (_, i) => i)]
-              .sort((a, b) => scores[b] - scores[a])
-              .map((i, rank) => (
-                <div
-                  key={i}
-                  className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                    rank === 0
-                      ? "bg-amber-50 dark:bg-amber-900/20"
-                      : "bg-background"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    {rank === 0 && <Trophy className="size-4 text-amber-500" />}
-                    <span className="text-lg">{PLAYER_ICONS[i]}</span>
-                    <span className="text-sm font-medium text-foreground">
-                      {getPlayerName(i)}
-                    </span>
-                  </div>
-                  <span className="text-sm font-bold text-foreground">
-                    {scores[i]}
-                  </span>
-                </div>
-              ))}
-          </div>
-        </div>
+        <Scoreboard
+          scores={scores}
+          numPlayers={numPlayers}
+          getPlayerName={getPlayerName}
+          title={dict.scoreboard}
+        />
 
         {/* Actions */}
         <div className="flex gap-3">
@@ -717,77 +591,20 @@ export function TruthOrDareGame({ truths, dares, dict, slug, lang }: TruthOrDare
 
   // ─── Render: Game Over ─────────────────────────────────────────
   if (phase === "game-over") {
-    const maxScore = Math.max(...scores);
-    const winners = scores
-      .map((s, i) => (s === maxScore ? i : -1))
-      .filter((i) => i >= 0);
-    const isTied = winners.length > 1;
-
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="mx-auto w-full max-w-md space-y-6 rounded-2xl border border-border bg-card p-6 text-center shadow-lg"
-      >
-        <h2 className="text-2xl font-bold text-foreground">
-          🎉 {dict.gameOver}
-        </h2>
-
-        {/* Winner */}
-        <div className="flex flex-col items-center gap-2">
-          <Trophy className="size-10 text-amber-500" />
-          <p className="text-sm font-medium text-muted-foreground">
-            {isTied ? dict.tied : dict.winner}
-          </p>
-          <div className="flex items-center gap-3">
-            {winners.map((i) => (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <span className="text-4xl">{PLAYER_ICONS[i]}</span>
-                <span className="text-lg font-bold text-foreground">
-                  {getPlayerName(i)}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {scores[i]} {dict.points}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Full scoreboard */}
-        <div className="space-y-1.5">
-          {[...Array.from({ length: numPlayers }, (_, i) => i)]
-            .sort((a, b) => scores[b] - scores[a])
-            .map((i, rank) => (
-              <div
-                key={i}
-                className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                  rank === 0
-                    ? "bg-amber-50 dark:bg-amber-900/20"
-                    : "bg-background"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    #{rank + 1}
-                  </span>
-                  <span className="text-lg">{PLAYER_ICONS[i]}</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {getPlayerName(i)}
-                  </span>
-                </div>
-                <span className="text-sm font-bold text-foreground">
-                  {scores[i]}
-                </span>
-              </div>
-            ))}
-        </div>
-
-        <Button className="w-full" size="lg" onClick={newGame}>
-          <RotateCcw className="size-4" />
-          {dict.playAgain}
-        </Button>
-      </motion.div>
+      <GameOver
+        scores={scores}
+        numPlayers={numPlayers}
+        getPlayerName={getPlayerName}
+        labels={{
+          gameOver: dict.gameOver,
+          winner: dict.winner,
+          tied: dict.tied,
+          playAgain: dict.playAgain,
+          points: dict.points,
+        }}
+        onPlayAgain={newGame}
+      />
     );
   }
 
