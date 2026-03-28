@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { AdSenseScript } from "@/components/layout/adsense-script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -131,15 +132,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${cairo.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT}`}
-            crossOrigin="anonymous"
-          />
-        )}
-      </head>
+      <head />
       <body
         className={`min-h-full flex flex-col bg-background text-foreground ${isArabic ? "font-[family-name:var(--font-cairo)]" : "font-[family-name:var(--font-geist-sans)]"}`}
       >
@@ -147,6 +140,7 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
         />
+        <AdSenseScript />
         <ThemeProvider>
           <AnalyticsProvider lang={locale} />
           <Header lang={locale} />
