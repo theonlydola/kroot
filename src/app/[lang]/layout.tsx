@@ -142,7 +142,7 @@ export default async function RootLayout({
         />
         <AdSenseScript />
         <ThemeProvider>
-          <AnalyticsProvider lang={locale} />
+          <AnalyticsProvider />
           <Header lang={locale} />
           <main className="flex flex-1 flex-col">{children}</main>
           <Footer lang={locale} />

@@ -17,12 +17,6 @@ export function initMixpanel() {
   initialized = true;
 }
 
-export function trackPageView(page: string, lang: string) {
-  if (!token || isLocalhost) return;
-  initMixpanel();
-  mixpanel.track("Page View", { page, lang });
-}
-
 export function trackGameStart(slug: string, lang: string) {
   if (isLocalhost) return;
   mixpanel.track("Game Start", { game: slug, lang });
