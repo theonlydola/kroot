@@ -9,6 +9,7 @@ type JoinRoomProps = {
   onJoin: (code: string, name: string) => Promise<void>;
   onBack: () => void;
   error?: string | null;
+  initialCode?: string;
   dict: {
     joinRoom: string;
     enterCode: string;
@@ -19,8 +20,8 @@ type JoinRoomProps = {
   };
 };
 
-export function JoinRoom({ onJoin, onBack, error, dict }: JoinRoomProps) {
-  const [code, setCode] = useState("");
+export function JoinRoom({ onJoin, onBack, error, initialCode, dict }: JoinRoomProps) {
+  const [code, setCode] = useState(initialCode || "");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 

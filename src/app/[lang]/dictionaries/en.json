@@ -175,7 +175,9 @@
     "votesIn": "votes in",
     "waitingForVotes": "Waiting for all votes...",
     "youVoted": "Vote submitted!",
-    "or": "or"
+    "or": "or",
+    "managePlayers": "Manage Players",
+    "category": "Category"
   },
   "footer": {
     "tagline": "Free card games for your next gathering.",

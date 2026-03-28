@@ -12,6 +12,7 @@ import {
   X,
   Wifi,
   WifiOff,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
@@ -97,6 +98,8 @@ export type OnlineImposterGameProps = {
     waitingForImposter: string;
     youVoted: string;
     or: string;
+    managePlayers: string;
+    category: string;
   };
   slug: string;
   lang: string;
@@ -462,6 +465,29 @@ export function OnlineImposterGame({
     setImposterGuessResult(null);
   }, [isHost, room, categories, players, gameState, playerId, broadcast]);
 
+  // ─── Host: Back to Lobby (manage players) ──────────────────────
+  const backToLobby = useCallback(async () => {
+    if (!isHost) return;
+
+    const newState: ImposterOnlineState = {
+      ...gameState,
+      phase: "lobby",
+      votes: {},
+      readyPlayers: [],
+      imposterGuessResult: null,
+      imposterGuessOptions: [],
+    };
+
+    await updateRoomState(room.id, playerId, newState);
+    broadcast({ type: "game:phase", state: newState });
+    setGameState(newState);
+    setRevealed(false);
+    setHasVoted(false);
+    setMyWord(null);
+    setAmImposter(false);
+    setImposterGuessResult(null);
+  }, [isHost, gameState, room.id, playerId, broadcast]);
+
   // ─── Host: End Game ────────────────────────────────────────────
   const endGame = useCallback(async () => {
     if (!isHost) return;
@@ -497,7 +523,7 @@ export function OnlineImposterGame({
   // ─── Connection indicator ──────────────────────────────────────
   const ConnectionBadge = () => (
     <div
-      className={`fixed top-4 right-4 z-50 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
+      className={`fixed top-16 right-4 z-30 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
         connected
           ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
           : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
@@ -537,6 +563,9 @@ export function OnlineImposterGame({
   // ─── Dealing Phase ─────────────────────────────────────────────
   if (gameState.phase === "dealing") {
     const allReady = gameState.readyPlayers.length >= players.length;
+    const categoryKey = (room.game_config.category || "food") as CategoryKey;
+    const categoryEmoji = categoryKey === "food" ? "🍕" : categoryKey === "animals" ? "🐾" : "📦";
+    const categoryLabel = dict[categoryKey] || categoryKey;
 
     return (
       <div className="flex flex-col items-center gap-6">
@@ -574,6 +603,9 @@ export function OnlineImposterGame({
                 onClick={handleRevealCard}
                 className="flex min-h-[300px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border border-border bg-card p-6 shadow-lg transition-shadow hover:shadow-xl touch-manipulation"
               >
+                <p className="mb-2 text-sm font-medium text-muted-foreground">
+                  {categoryEmoji} {categoryLabel}
+                </p>
                 <span className="text-6xl">
                   {PLAYER_ICONS[myIndex] || "❓"}
                 </span>
@@ -600,6 +632,9 @@ export function OnlineImposterGame({
                     : "bg-gradient-to-br from-green-500/10 to-emerald-500/10"
                 }`}
               >
+                <p className="mb-2 text-sm font-medium text-muted-foreground">
+                  {categoryEmoji} {categoryLabel}
+                </p>
                 <span className="text-5xl">
                   {PLAYER_ICONS[myIndex] || "❓"}
                 </span>
@@ -913,10 +948,14 @@ export function OnlineImposterGame({
 
       {/* Action buttons */}
       {isHost && (
-        <div className="flex gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
           <Button variant="outline" onClick={handleLeave}>
             <RotateCcw className="size-4" />
             {dict.newGame}
+          </Button>
+          <Button variant="outline" onClick={backToLobby}>
+            <Users className="size-4" />
+            {onlineDict.managePlayers}
           </Button>
           <Button onClick={startNextRound}>
             <Play className="size-4" />

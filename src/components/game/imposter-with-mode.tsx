@@ -282,7 +282,7 @@ export function ImposterWithMode({
           <div className="flex items-center gap-3">
             <button
               type="button"
-              disabled={maxPlayers <= 4}
+              disabled={maxPlayers <= 3}
               onClick={() => setMaxPlayers((n) => n - 1)}
               className="flex size-10 items-center justify-center rounded-xl border text-lg font-medium transition-all touch-manipulation border-border bg-background text-foreground hover:bg-muted disabled:opacity-40 disabled:pointer-events-none"
             >

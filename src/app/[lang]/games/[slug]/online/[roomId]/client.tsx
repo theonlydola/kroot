@@ -76,6 +76,7 @@ export function OnlineRoomClient({
           window.location.href = `/${lang}/games/${slug}`;
         }}
         error={error}
+        initialCode={room.code}
         dict={{
           joinRoom: onlineDict.joinRoom,
           enterCode: onlineDict.enterCode,

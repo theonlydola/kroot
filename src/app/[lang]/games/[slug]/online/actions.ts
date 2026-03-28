@@ -105,9 +105,8 @@ export async function joinRoom(
     return { error: "This room has already finished." };
   }
 
-  if (typedRoom.status === "playing") {
-    return { error: "This game has already started." };
-  }
+  // Allow joining mid-game — new players wait for next round
+  // if (typedRoom.status === "playing") { ... }
 
   const maxPlayers = typedRoom.game_config.maxPlayers || 10;
   if (typedRoom.players.length >= maxPlayers) {
