@@ -8,6 +8,8 @@ import { getRoomById } from "@/app/[lang]/games/[slug]/online/actions";
 import { PlayerIconsProvider } from "@/components/game/shared/player-icons-context";
 import { OnlineRoomClient } from "./client";
 
+const ONLINE_SUPPORTED_SLUGS = ["imposter", "bad-people"];
+
 export default async function OnlineRoomPage({
   params,
 }: {
@@ -20,8 +22,8 @@ export default async function OnlineRoomPage({
   const game = getGameBySlug(slug);
   if (!game) notFound();
 
-  // Only imposter supports online for now
-  if (slug !== "imposter") notFound();
+  // Only supported games have online mode
+  if (!ONLINE_SUPPORTED_SLUGS.includes(slug)) notFound();
 
   const room = await getRoomById(roomId);
   if (!room) notFound();
@@ -30,7 +32,11 @@ export default async function OnlineRoomPage({
   const dir = getDirection(locale);
   const isRtl = dir === "rtl";
   const BackArrow = isRtl ? ArrowRight : ArrowLeft;
-  const imposterData = getImposterGame();
+
+  // Prepare game-specific data
+  const isImposter = slug === "imposter";
+  const isBadPeople = slug === "bad-people";
+  const imposterData = isImposter ? getImposterGame() : null;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
@@ -64,8 +70,9 @@ export default async function OnlineRoomPage({
       <PlayerIconsProvider>
         <OnlineRoomClient
           room={room}
-          categories={imposterData.categories[locale]}
-          dict={dict.imposter}
+          categories={isImposter && imposterData ? imposterData.categories[locale] : undefined}
+          questions={isBadPeople && game.cards ? game.cards[locale] : undefined}
+          dict={isImposter ? dict.imposter : dict.badPeople}
           onlineDict={dict.online}
           slug={slug}
           lang={locale}

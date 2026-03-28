@@ -21,6 +21,13 @@
     "playNow": "العب دلوقتي",
     "featuredGames": "الألعاب المميزة"
   },
+  "games": {
+    "imposter": "بكاسة",
+    "dark-stories": "ايه اللي حصل",
+    "bad-people": "ناس مش تمام",
+    "truth-or-dare": "صراحة ولا جرأة",
+    "would-you-rather": "تفضل إيه"
+  },
   "game": {
     "card": "كارت",
     "of": "من",
@@ -155,6 +162,7 @@
     "waitingForPlayers": "مستنين لاعبين...",
     "waitingForHost": "مستنين الهوست يبدأ...",
     "waitingForImposter": "مستنين المندس...",
+    "waitingForMaster": "مستنين الماستر يصوّت...",
     "playersCount": "لاعبين",
     "startGame": "ابدأ اللعبة",
     "needMorePlayers": "محتاج على الأقل {min} لاعبين",
@@ -181,7 +189,11 @@
   },
   "footer": {
     "tagline": "ألعاب ورق مجانية لقعدتك الجاية.",
-    "rights": "جميع الحقوق محفوظة."
+    "rights": "جميع الحقوق محفوظة.",
+    "gamesLabel": "الألعاب",
+    "linksLabel": "الروابط",
+    "contact": "تواصل معنا",
+    "madeWith": "مصنوع للتجمعات في كل مكان 🌍"
   },
   "notFound": {
     "title": "الصفحة مش موجودة",

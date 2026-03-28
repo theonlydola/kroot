@@ -21,6 +21,13 @@
     "playNow": "Play Now",
     "featuredGames": "Featured Games"
   },
+  "games": {
+    "imposter": "Imposter",
+    "dark-stories": "Dark Stories",
+    "bad-people": "Bad People",
+    "truth-or-dare": "Truth or Dare",
+    "would-you-rather": "Would You Rather"
+  },
   "game": {
     "card": "Card",
     "of": "of",
@@ -56,7 +63,7 @@
     "revealWord": "Reveal Word",
     "imposterWas": "The Imposter was",
     "theWordWas": "The Word was",
-    "playAgain": "Play Again",
+    "playAgain": "Play Again (continue the same game)",
     "newGame": "New Game",
     "round": "Round",
     "continueGame": "Continue Game?",
@@ -155,6 +162,7 @@
     "waitingForPlayers": "Waiting for players...",
     "waitingForHost": "Waiting for host to start...",
     "waitingForImposter": "Waiting for imposter...",
+    "waitingForMaster": "Waiting for the master to vote...",
     "playersCount": "Players",
     "startGame": "Start Game",
     "needMorePlayers": "Need at least {min} players",
@@ -181,7 +189,11 @@
   },
   "footer": {
     "tagline": "Free card games for your next gathering.",
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "gamesLabel": "Games",
+    "linksLabel": "Links",
+    "contact": "Contact",
+    "madeWith": "Made for gatherings everywhere 🌍"
   },
   "notFound": {
     "title": "Page Not Found",

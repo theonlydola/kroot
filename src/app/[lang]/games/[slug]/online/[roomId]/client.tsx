@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import type { Room } from "@/lib/room-types";
+import type { ImposterGameConfig, ImposterOnlineState } from "@/lib/room-types";
 import { joinRoom } from "@/app/[lang]/games/[slug]/online/actions";
 import { OnlineImposterGame, type OnlineImposterGameProps } from "@/components/game/online-imposter-game";
+import { OnlineBadPeopleGame, type OnlineBadPeopleGameProps } from "@/components/game/online-bad-people-game";
 import { JoinRoom } from "@/components/game/shared/join-room";
 
 type CategoryKey = "food" | "animals" | "objects";
@@ -11,7 +13,8 @@ type WordPair = { word: string; imposter: string };
 
 type OnlineRoomClientProps = {
   room: Room;
-  categories: Record<CategoryKey, WordPair[]>;
+  categories?: Record<CategoryKey, WordPair[]>;
+  questions?: string[];
   dict: Record<string, string>;
   onlineDict: Record<string, string>;
   slug: string;
@@ -24,6 +27,7 @@ const PLAYER_ROOM_KEY = "kroot-online-room-id";
 export function OnlineRoomClient({
   room,
   categories,
+  questions,
   dict,
   onlineDict,
   slug,
@@ -90,11 +94,25 @@ export function OnlineRoomClient({
   }
 
   // In the room — render the game
+  if (slug === "bad-people" && questions) {
+    return (
+      <OnlineBadPeopleGame
+        room={room}
+        playerId={playerId}
+        questions={questions}
+        dict={dict as OnlineBadPeopleGameProps["dict"]}
+        onlineDict={onlineDict as OnlineBadPeopleGameProps["onlineDict"]}
+        slug={slug}
+        lang={lang}
+      />
+    );
+  }
+
   return (
     <OnlineImposterGame
-      room={room}
+      room={room as Room<ImposterGameConfig, ImposterOnlineState>}
       playerId={playerId}
-      categories={categories}
+      categories={categories!}
       dict={dict as OnlineImposterGameProps["dict"]}
       onlineDict={onlineDict as OnlineImposterGameProps["onlineDict"]}
       slug={slug}

@@ -4,8 +4,10 @@ import { getSupabaseServerClient } from "@/lib/supabase";
 import type {
   Room,
   RoomPlayer,
-  ImposterGameConfig,
   ImposterOnlineState,
+  BadPeopleOnlineState,
+  GameConfig,
+  GameState,
 } from "@/lib/room-types";
 
 function generateRoomCode(): string {
@@ -24,7 +26,7 @@ function generatePlayerId(): string {
 export async function createRoom(
   slug: string,
   hostName: string,
-  gameConfig: ImposterGameConfig,
+  gameConfig: GameConfig,
 ): Promise<{ roomId: string; code: string; playerId: string } | { error: string }> {
   const supabase = getSupabaseServerClient();
   const playerId = generatePlayerId();
@@ -40,18 +42,34 @@ export async function createRoom(
       icon_index: 0,
     };
 
-    const initialState: ImposterOnlineState = {
-      phase: "lobby",
-      round: 0,
-      word: "",
-      imposterIndex: -1,
-      timerEnd: 0,
-      votes: {},
-      readyPlayers: [],
-      scores: [],
-      imposterGuessResult: null,
-      imposterGuessOptions: [],
-    };
+    let initialState: GameState;
+
+    if (slug === "bad-people") {
+      initialState = {
+        phase: "lobby",
+        round: 0,
+        masterIndex: 0,
+        questionIndex: 0,
+        shuffledQuestions: [],
+        masterVote: -1,
+        votes: {},
+        currentVoterIndex: 0,
+        scores: [],
+      } satisfies BadPeopleOnlineState;
+    } else {
+      initialState = {
+        phase: "lobby",
+        round: 0,
+        word: "",
+        imposterIndex: -1,
+        timerEnd: 0,
+        votes: {},
+        readyPlayers: [],
+        scores: [],
+        imposterGuessResult: null,
+        imposterGuessOptions: [],
+      } satisfies ImposterOnlineState;
+    }
 
     const { data, error } = await supabase
       .from("rooms")
@@ -169,7 +187,7 @@ export async function getRoomById(
 export async function updateRoomState(
   roomId: string,
   hostId: string,
-  gameState: ImposterOnlineState,
+  gameState: GameState,
   status?: "waiting" | "playing" | "finished",
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseServerClient();
@@ -215,10 +233,10 @@ export async function submitVote(
 
   if (!room) return { success: false, voteCount: 0, error: "Room not found." };
 
-  const state = room.game_state as ImposterOnlineState;
+  const state = room.game_state as GameState;
   const players = room.players as RoomPlayer[];
 
-  if (state.phase !== "voting") {
+  if (state.phase !== "voting" && state.phase !== "player-vote") {
     return { success: false, voteCount: 0, error: "Not in voting phase." };
   }
 

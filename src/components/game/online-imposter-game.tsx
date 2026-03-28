@@ -20,7 +20,8 @@ import type {
   Room,
   RoomPlayer,
   ImposterOnlineState,
-  BroadcastEvent,
+  ImposterGameConfig,
+  ImposterBroadcastEvent,
 } from "@/lib/room-types";
 import {
   updateRoomState,
@@ -38,7 +39,7 @@ type CategoryKey = "food" | "animals" | "objects";
 type WordPair = { word: string; imposter: string };
 
 export type OnlineImposterGameProps = {
-  room: Room;
+  room: Room<ImposterGameConfig, ImposterOnlineState>;
   playerId: string;
   categories: Record<CategoryKey, WordPair[]>;
   dict: {
@@ -116,7 +117,7 @@ export function OnlineImposterGame({
 }: OnlineImposterGameProps) {
   const PLAYER_ICONS = usePlayerIcons();
   const isHost = initialRoom.host_id === playerId;
-  const [room, setRoom] = useState<Room>(initialRoom);
+  const [room, setRoom] = useState<Room<ImposterGameConfig, ImposterOnlineState>>(initialRoom);
   const [gameState, setGameState] = useState<ImposterOnlineState>(
     initialRoom.game_state,
   );
@@ -156,7 +157,7 @@ export function OnlineImposterGame({
 
     channel
       .on("broadcast", { event: "game-event" }, ({ payload }) => {
-        const event = payload as BroadcastEvent;
+        const event = payload as ImposterBroadcastEvent;
         handleBroadcastEvent(event);
       })
       .on(
@@ -168,7 +169,7 @@ export function OnlineImposterGame({
           filter: `id=eq.${room.id}`,
         },
         (payload) => {
-          const updated = payload.new as Room;
+          const updated = payload.new as Room<ImposterGameConfig, ImposterOnlineState>;
           setRoom(updated);
           setPlayers(updated.players);
           setGameState(updated.game_state);
@@ -187,7 +188,7 @@ export function OnlineImposterGame({
   }, [room.id]);
 
   const broadcast = useCallback(
-    (event: BroadcastEvent) => {
+    (event: ImposterBroadcastEvent) => {
       channelRef.current?.send({
         type: "broadcast",
         event: "game-event",
@@ -198,7 +199,7 @@ export function OnlineImposterGame({
   );
 
   const handleBroadcastEvent = useCallback(
-    (event: BroadcastEvent) => {
+    (event: ImposterBroadcastEvent) => {
       switch (event.type) {
         case "game:start":
         case "game:phase":

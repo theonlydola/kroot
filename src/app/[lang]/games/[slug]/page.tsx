@@ -7,7 +7,7 @@ import { hasLocale, getDictionary } from "@/app/[lang]/dictionaries";
 import { games, getGameBySlug, getImposterGame, getTruthOrDareGame } from "@/data/games";
 import { GamePlay } from "@/components/game/game-play";
 import { ImposterWithMode } from "@/components/game/imposter-with-mode";
-import { BadPeopleGame } from "@/components/game/bad-people-game";
+import { BadPeopleWithMode } from "@/components/game/bad-people-with-mode";
 import { TruthOrDareGame } from "@/components/game/truth-or-dare-game";
 import { PlayerIconsProvider } from "@/components/game/shared/player-icons-context";
 
@@ -129,9 +129,10 @@ export default async function GamePage({
           lang={locale}
         />
       ) : game.slug === "bad-people" ? (
-        <BadPeopleGame
+        <BadPeopleWithMode
           cards={game.cards![locale]}
           dict={dict.badPeople}
+          onlineDict={dict.online}
           slug={slug}
           lang={locale}
         />
