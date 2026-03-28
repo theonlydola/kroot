@@ -10,6 +10,7 @@ import { AnalyticsProvider } from "@/components/analytics-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AdSenseScript } from "@/components/layout/adsense-script";
+import { games } from "@/data/games";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -131,6 +132,25 @@ export default async function RootLayout({
     logo: `${BASE_URL}/kroot.svg`,
   };
 
+  const websiteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Kroot",
+    url: `${BASE_URL}/${locale}`,
+    inLanguage: locale === "ar" ? "ar" : "en",
+  };
+
+  const navigationLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: games.map((game, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: game.name[locale],
+      url: `${BASE_URL}/${locale}/games/${game.slug}`,
+    })),
+  };
+
   return (
     <html
       lang={locale}
@@ -145,6 +165,14 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(navigationLd) }}
         />
         <AdSenseScript />
         <ThemeProvider>
